@@ -1,0 +1,44 @@
+﻿@model IsArama.Data.Entities.Job
+
+<div>
+    <!-- Başlık Bilgileri -->
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h4 class="fw-bold mb-1">@Model.Title</h4>
+            <p class="text-muted fw-semibold mb-0">@Model.Company.Name</p>
+        </div>
+        <span class="badge bg-primary fs-6">@Model.Source.Name</span>
+    </div>
+
+    <!-- Etiketler -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <span class="badge bg-light text-dark border">
+            <i class="bi bi-geo-alt me-1"></i>@Model.City
+        </span>
+        <span class="badge bg-light text-dark border">
+            <i class="bi bi-briefcase me-1"></i>@Model.JobType
+        </span>
+        <span class="badge bg-light text-dark border">
+            <i class="bi bi-tag me-1"></i>@Model.Category.Name
+        </span>
+        <span class="badge bg-light text-dark border">
+            <i class="bi bi-clock me-1"></i>@Model.PublishedAt.ToString("dd MMMM yyyy")
+        </span>
+    </div>
+
+    <!-- Açıklama -->
+    @if (!string.IsNullOrWhiteSpace(Model.Description))
+    {
+        <div class="border-top pt-3">
+            <h6 class="fw-bold mb-2">İlan Açıklaması</h6>
+            <div class="text-muted" style="white-space:pre-line">@Model.Description</div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-light border text-center py-4">
+            <i class="bi bi-file-text fs-2 d-block mb-2 text-muted"></i>
+            <p class="text-muted mb-0">Detaylı açıklama için ilanın orijinal sayfasını ziyaret edin.</p>
+        </div>
+    }
+</div>

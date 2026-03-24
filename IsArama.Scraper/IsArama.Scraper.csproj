@@ -6,4 +6,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
+    <PackageReference Include="Hangfire.Core" Version="1.8.23" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.41.0" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="146.0.7680.15300" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IsArama.Data\IsArama.Data.csproj" />
+  </ItemGroup>
+
 </Project>

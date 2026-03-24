@@ -1,31 +1,39 @@
-using System.Diagnostics;
+using IsArama.Data.Context;
 using Microsoft.AspNetCore.Mvc;
-using IsArama.Web.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace IsArama.Web.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly ApplicationDbContext _db;
 
-    public HomeController(ILogger<HomeController> logger)
-    {
-        _logger = logger;
-    }
+    public HomeController(ApplicationDbContext db) => _db = db;
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
-    }
+        var recentJobs = await _db.Jobs
+            .Include(j => j.Company)
+            .Include(j => j.Category)
+            .Include(j => j.Source)
+            .OrderByDescending(j => j.PublishedAt)
+            .Take(9)
+            .ToListAsync();
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+        var totalJobs = await _db.Jobs.CountAsync();
+        var totalSources = await _db.Sources.CountAsync(s => s.IsActive);
+        var totalCompanies = await _db.Companies.CountAsync();
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        ViewBag.TotalJobs = totalJobs;
+        ViewBag.TotalSources = totalSources;
+        ViewBag.TotalCompanies = totalCompanies;
+        ViewBag.Cities = await _db.Jobs
+    .Select(j => j.City)
+    .Distinct()
+    .OrderBy(c => c)
+    .ToListAsync();
+
+
+        return View(recentJobs);
     }
 }

@@ -1,8 +1,134 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<IsArama.Data.Entities.Job>
+@{
+    ViewData["Title"] = "Anasayfa";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- HERO -->
+<div class="bg-primary text-white py-5">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bold mb-3">
+            <i class="bi bi-briefcase-fill me-2"></i>Türkiye'nin Tüm İş İlanları
+        </h1>
+        <p class="lead mb-4">Kariyer.net, Eleman.net, İŞKUR ve 30+ kaynaktan toplanan ilanlar</p>
+
+        <form asp-controller="Jobs" asp-action="Index" method="get" class="row g-2 justify-content-center">
+            <div class="col-md-6">
+                <input type="text" name="q" class="form-control form-control-lg"
+                       placeholder="Pozisyon veya şirket ara..." />
+            </div>
+            <div class="col-md-3">
+                <select name="city" class="form-select form-select-lg">
+                    <option value="">Tüm Şehirler</option>
+                    @foreach (var city in ViewBag.Cities ?? new List<string>())
+                    {
+                        <option value="@city">@city</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">
+                    <i class="bi bi-search me-1"></i>Ara
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
+
+<!-- İSTATİSTİKLER -->
+<div class="bg-light py-4 border-bottom">
+    <div class="container">
+        <div class="row text-center g-3">
+            <div class="col-md-4">
+                <div class="fw-bold fs-3 text-primary">@ViewBag.TotalJobs.ToString("N0")</div>
+                <div class="text-muted small">Aktif İlan</div>
+            </div>
+            <div class="col-md-4">
+                <div class="fw-bold fs-3 text-success">@ViewBag.TotalSources</div>
+                <div class="text-muted small">Kaynak Site</div>
+            </div>
+            <div class="col-md-4">
+                <div class="fw-bold fs-3 text-warning">@ViewBag.TotalCompanies.ToString("N0")</div>
+                <div class="text-muted small">Şirket</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SON İLANLAR -->
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">
+            <i class="bi bi-clock-history me-2 text-primary"></i>Son Eklenen İlanlar
+        </h2>
+        <a asp-controller="Jobs" asp-action="Index" class="btn btn-outline-primary">
+            Tümünü Gör <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center py-5">
+            <i class="bi bi-info-circle fs-1 d-block mb-3"></i>
+            <h5>Henüz ilan bulunmuyor</h5>
+            <p class="text-muted">Scraper çalıştığında ilanlar burada görünecek.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var job in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 job-card"
+                         style="cursor:pointer"
+                         data-job-id="@job.Id"
+                         data-bs-toggle="modal"
+                         data-bs-target="#jobModal">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary">@job.Source.Name</span>
+                                <span class="badge bg-light text-dark border">@job.JobType</span>
+                            </div>
+                            <h5 class="card-title fw-bold mb-1">@job.Title</h5>
+                            <p class="text-muted mb-2 fw-semibold">@job.Company.Name</p>
+                            <div class="d-flex gap-3 text-muted small">
+                                <span><i class="bi bi-geo-alt me-1"></i>@job.City</span>
+                                <span><i class="bi bi-tag me-1"></i>@job.Category.Name</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 text-muted small">
+                            <i class="bi bi-clock me-1"></i>@DateHelper.ToRelative(job.PublishedAt)
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- JOB DETAIL MODAL -->
+<div class="modal fade" id="jobModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="modalTitle">İlan Detayı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <a id="modalOriginalUrl" href="#" target="_blank" class="btn btn-primary">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>İlana Git
+                </a>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/jobModal.js"></script>
+}

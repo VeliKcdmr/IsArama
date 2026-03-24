@@ -20,3 +20,60 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Job Card Hover */
+.job-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .job-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12) !important;
+        border-color: #0d6efd !important;
+    }
+
+/* Navbar active link */
+.navbar-nav .nav-link:hover {
+    color: #fff !important;
+    opacity: 0.85;
+}
+
+/* Hero arama kutusu */
+.hero-search .form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(255,193,7,0.4);
+    border-color: #ffc107;
+}
+
+/* Pagination */
+.pagination .page-link {
+    border-radius: 8px !important;
+    margin: 0 2px;
+}
+
+/* Modal */
+.modal-content {
+    border-radius: 16px;
+    border: none;
+}
+
+.modal-header {
+    padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.modal-body {
+    padding: 1rem 1.5rem;
+}
+
+.modal-footer {
+    padding: 0.5rem 1.5rem 1.5rem;
+}
+
+/* Filter card */
+.sticky-top {
+    z-index: 100;
+}
+
+/* Badge */
+.badge {
+    font-weight: 500;
+}
