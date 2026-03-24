@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="IsArama.Api/IsArama.Api.csproj" />
+  <Project Path="IsArama.Data/IsArama.Data.csproj" />
+  <Project Path="IsArama.Mobile/IsArama.Mobile.csproj" />
+  <Project Path="IsArama.Scraper/IsArama.Scraper.csproj" />
+  <Project Path="IsArama.Web/IsArama.Web.csproj" Id="920c0edf-e7a3-4c57-8a16-50d1995187a2" />
+</Solution>
