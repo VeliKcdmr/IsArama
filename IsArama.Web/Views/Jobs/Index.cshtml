@@ -108,7 +108,7 @@
                                     </div>
                                 </div>
                                 <div class="card-footer bg-transparent border-0 text-muted small">
-                                    <i class="bi bi-clock me-1"></i>@job.PublishedAt.ToString("dd MMM yyyy")
+                                    <i class="bi bi-clock me-1"></i>@DateHelper.ToRelative(job.PublishedAt)
                                 </div>
                             </div>
                         </div>
