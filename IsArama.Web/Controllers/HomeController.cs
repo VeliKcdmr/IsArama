@@ -21,12 +21,17 @@ public class HomeController : Controller
             .ToListAsync();
 
         var totalJobs = await _db.Jobs.CountAsync();
-        var totalSources = await _db.Sources.CountAsync(s => s.IsActive);
+        var activeSources = await _db.Sources
+            .Where(s => s.IsActive && _db.Jobs.Any(j => j.SourceId == s.Id))
+            .OrderByDescending(s => _db.Jobs.Count(j => j.SourceId == s.Id))
+            .ToListAsync();
+        var totalSources = activeSources.Count;
         var totalCompanies = await _db.Companies.CountAsync();
 
-        ViewBag.TotalJobs = totalJobs;
-        ViewBag.TotalSources = totalSources;
+        ViewBag.TotalJobs     = totalJobs;
+        ViewBag.TotalSources  = totalSources;
         ViewBag.TotalCompanies = totalCompanies;
+        ViewBag.SourceNames   = string.Join(", ", activeSources.Take(3).Select(s => s.Name));
         ViewBag.Cities = await _db.Jobs
     .Select(j => j.City)
     .Distinct()

@@ -1,4 +1,5 @@
 ﻿using IsArama.Data.Context;
+using IsArama.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,11 +8,16 @@ namespace IsArama.Web.Controllers;
 public class JobsController : Controller
 {
     private readonly ApplicationDbContext _db;
+    private readonly JobDetailFetcher _fetcher;
 
-    public JobsController(ApplicationDbContext db) => _db = db;
+    public JobsController(ApplicationDbContext db, JobDetailFetcher fetcher)
+    {
+        _db      = db;
+        _fetcher = fetcher;
+    }
 
     public async Task<IActionResult> Index(
-        string? q, string? city, int? categoryId, string? jobType, int page = 1)
+        string? q, string? city, int? categoryId, string? jobType, int? sourceId, int page = 1)
     {
         const int pageSize = 20;
 
@@ -33,6 +39,9 @@ public class JobsController : Controller
         if (!string.IsNullOrWhiteSpace(jobType))
             query = query.Where(j => j.JobType == jobType);
 
+        if (sourceId.HasValue)
+            query = query.Where(j => j.SourceId == sourceId);
+
         var total = await query.CountAsync();
         var jobs = await query
             .OrderByDescending(j => j.PublishedAt)
@@ -40,15 +49,23 @@ public class JobsController : Controller
             .Take(pageSize)
             .ToListAsync();
 
-        ViewBag.Q = q;
-        ViewBag.City = city;
+        ViewBag.Q          = q;
+        ViewBag.City       = city;
         ViewBag.CategoryId = categoryId;
-        ViewBag.JobType = jobType;
-        ViewBag.Page = page;
+        ViewBag.JobType    = jobType;
+        ViewBag.SourceId   = sourceId;
+        ViewBag.Page       = page;
+        ViewBag.PageSize   = pageSize;
         ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
-        ViewBag.Total = total;
-        ViewBag.Categories = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
-        ViewBag.Cities = await _db.Jobs.Select(j => j.City).Distinct().OrderBy(c => c).ToListAsync();
+        ViewBag.Total      = total;
+        ViewBag.Categories   = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
+        ViewBag.Cities       = await _db.Jobs.Select(j => j.City).Distinct().OrderBy(c => c).ToListAsync();
+        ViewBag.Sources      = await _db.Sources.Where(s => s.IsActive).OrderBy(s => s.Name).ToListAsync();
+        ViewBag.SourceCounts = await _db.Jobs
+            .GroupBy(j => j.SourceId)
+            .Select(g => new { SourceId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(g => g.SourceId, g => g.Count);
+        ViewBag.TotalAll = await _db.Jobs.CountAsync();
 
         return View(jobs);
     }
@@ -62,6 +79,10 @@ public class JobsController : Controller
             .FirstOrDefaultAsync(j => j.Id == id);
 
         if (job == null) return NotFound();
+
+        if (string.IsNullOrWhiteSpace(job.Description))
+            job.Description = await _fetcher.GetOrFetchAsync(id);
+
         return PartialView("_JobDetailPartial", job);
     }
 

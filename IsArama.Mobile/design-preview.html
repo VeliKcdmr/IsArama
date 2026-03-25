@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>İsArama MAUI - Tasarım Önizleme</title>
+<style>
+  body { background: #f1f5f9; font-family: -apple-system, 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+  h1 { text-align: center; color: #1e293b; font-size: 1.2rem; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #64748b; font-size: 0.8rem; margin-bottom: 24px; }
+  .screens { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+  .screen-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .screen-label { font-size: 0.75rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Phone frame */
+  .phone {
+    width: 360px;
+    height: 760px;
+    background: #fff;
+    border-radius: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 0 0 2px #1e293b, inset 0 0 0 2px #fff;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  /* Status bar */
+  .status-bar {
+    background: #1d4ed8;
+    padding: 10px 20px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.72rem;
+    color: #fff;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .status-icons { display: flex; gap: 4px; align-items: center; }
+  /* Top App Bar */
+  .app-bar {
+    background: #1d4ed8;
+    padding: 8px 16px 14px;
+    color: white;
+    flex-shrink: 0;
+  }
+  .app-bar-title { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.5px; }
+  .app-bar-sub { font-size: 0.72rem; opacity: 0.8; margin-top: 1px; }
+
+  /* Search bar */
+  .search-wrap { padding: 12px 14px 6px; background: #1d4ed8; flex-shrink: 0; }
+  .search-box {
+    background: rgba(255,255,255,0.18);
+    border-radius: 12px;
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255,255,255,0.9);
+    font-size: 0.85rem;
+  }
+  .search-icon { font-size: 0.9rem; opacity: 0.8; }
+
+  /* Bottom wave */
+  .wave-spacer { height: 16px; background: linear-gradient(to bottom right, #1d4ed8 50%, #f1f5f9 50%); flex-shrink: 0; }
+
+  /* Scroll content */
+  .scroll-area { flex: 1; overflow: hidden; background: #f1f5f9; display: flex; flex-direction: column; }
+
+  /* Source chips */
+  .source-chips {
+    display: flex; gap: 6px; padding: 10px 14px 6px;
+    overflow-x: hidden; flex-shrink: 0;
+    flex-wrap: nowrap;
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: 999px;
+    font-size: 0.72rem; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+    border: 1.5px solid #e2e8f0;
+  }
+  .chip-all { background: #2563eb; border-color: #2563eb; color: #fff; }
+  .chip-normal { background: #fff; color: #374151; }
+  .chip-count {
+    background: rgba(0,0,0,0.1); border-radius: 999px;
+    padding: 1px 5px; font-size: 0.65rem; font-weight: 700;
+  }
+  .chip-all .chip-count { background: rgba(255,255,255,0.25); }
+  .chip-favicon { width: 12px; height: 12px; border-radius: 2px; background: #e2e8f0; }
+
+  /* Filter row */
+  .filter-row {
+    display: flex; gap: 8px; padding: 4px 14px 8px; flex-shrink: 0; overflow: hidden;
+  }
+  .filter-pill {
+    display: flex; align-items: center; gap: 4px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: 5px 10px; font-size: 0.72rem; color: #374151; white-space: nowrap;
+  }
+  .filter-arrow { color: #94a3b8; font-size: 0.65rem; }
+
+  /* Job list */
+  .job-list { flex: 1; padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+  .job-card {
+    background: #fff; border-radius: 14px; padding: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid #e8edf2;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .job-logo {
+    width: 40px; height: 40px; border-radius: 10px;
+    border: 1px solid #e2e8f0; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1rem; color: #64748b; background: #f1f5f9;
+  }
+  .job-info { flex: 1; min-width: 0; }
+  .job-title { font-size: 0.82rem; font-weight: 600; color: #1e293b; line-height: 1.3; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .job-company { font-size: 0.73rem; color: #64748b; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .job-tags { display: flex; gap: 4px; flex-wrap: nowrap; overflow: hidden; }
+  .job-tag {
+    font-size: 0.65rem; padding: 2px 7px; border-radius: 6px;
+    background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .job-tag-blue { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+  .job-time { font-size: 0.65rem; color: #94a3b8; margin-top: 4px; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    background: #fff; border-top: 1px solid #e2e8f0;
+    display: flex; padding: 8px 0 14px; flex-shrink: 0;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    font-size: 0.6rem; color: #94a3b8; cursor: pointer;
+  }
+  .nav-item.active { color: #2563eb; }
+  .nav-icon { font-size: 1.2rem; line-height: 1; }
+
+  /* ===== DETAIL SCREEN ===== */
+  .detail-app-bar {
+    background: #1d4ed8; padding: 10px 16px 14px; color: white; flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .back-btn { font-size: 1.1rem; cursor: pointer; }
+  .detail-bar-title { font-size: 1rem; font-weight: 700; flex: 1; }
+  .detail-scroll { flex: 1; overflow: hidden; background: #f1f5f9; display: flex; flex-direction: column; }
+  .detail-header {
+    background: #fff; margin: 10px 12px 0; border-radius: 16px;
+    padding: 14px; display: flex; gap: 12px; align-items: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+  .detail-logo {
+    width: 54px; height: 54px; border-radius: 12px; border: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.4rem; color: #64748b; background: #f1f5f9; flex-shrink: 0;
+  }
+  .detail-title { font-size: 0.9rem; font-weight: 700; color: #1e293b; line-height: 1.3; margin-bottom: 3px; }
+  .detail-company { font-size: 0.78rem; color: #64748b; margin-bottom: 0; }
+  .detail-tags { display: flex; gap: 5px; flex-wrap: wrap; padding: 10px 12px 0; }
+  .detail-tag {
+    font-size: 0.68rem; padding: 4px 9px; border-radius: 8px;
+    background: #f8fafc; color: #475569; border: 1px solid #e2e8f0;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .detail-source-tag { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+  .detail-desc-card {
+    background: #fff; margin: 8px 12px 0; border-radius: 16px;
+    padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); flex: 1; overflow: hidden;
+  }
+  .desc-section-title { font-size: 0.75rem; font-weight: 700; color: #1e293b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .desc-text { font-size: 0.75rem; color: #374151; line-height: 1.6; }
+  .desc-bullet { margin-bottom: 4px; padding-left: 12px; position: relative; }
+  .desc-bullet::before { content: '•'; position: absolute; left: 0; color: #2563eb; }
+  .detail-actions {
+    padding: 10px 12px 14px; display: flex; gap: 8px; background: #f1f5f9; flex-shrink: 0;
+  }
+  .btn-primary {
+    flex: 1; background: #2563eb; color: #fff; border-radius: 12px;
+    padding: 12px; text-align: center; font-weight: 700; font-size: 0.82rem;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+  }
+  .btn-secondary {
+    background: #fff; color: #2563eb; border: 1.5px solid #2563eb; border-radius: 12px;
+    padding: 12px 14px; font-weight: 600; font-size: 0.82rem;
+  }
+</style>
+</head>
+<body>
+<h1>🔍 İsArama — MAUI Mobil Tasarım Önizleme</h1>
+<p class="subtitle">.NET 10 MAUI Android · Onay bekleniyor</p>
+
+<div class="screens">
+
+  <!-- SCREEN 1: Job List -->
+  <div class="screen-wrap">
+    <div class="screen-label">1 — İş İlanları (Ana Ekran)</div>
+    <div class="phone">
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span>9:41</span>
+        <div class="status-icons">
+          <span>📶</span><span>🔋</span>
+        </div>
+      </div>
+      <!-- App bar -->
+      <div class="app-bar">
+        <div class="app-bar-title">🔍 İsArama</div>
+        <div class="app-bar-sub">Türkiye'nin iş ilanları</div>
+      </div>
+      <!-- Search -->
+      <div class="search-wrap">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <span>İş unvanı veya şirket ara...</span>
+        </div>
+      </div>
+      <div class="wave-spacer"></div>
+
+      <!-- Source chips -->
+      <div class="source-chips">
+        <div class="chip chip-all"><span>Tümü</span><span class="chip-count">2.4k</span></div>
+        <div class="chip chip-normal">
+          <div class="chip-favicon" style="background:#0a66c2;"></div>
+          <span>LinkedIn</span><span class="chip-count">420</span>
+        </div>
+        <div class="chip chip-normal">
+          <div class="chip-favicon" style="background:#e83030;"></div>
+          <span>Kariyer</span><span class="chip-count">380</span>
+        </div>
+        <div class="chip chip-normal">
+          <div class="chip-favicon" style="background:#f59e0b;"></div>
+          <span>Memurlar</span><span class="chip-count">310</span>
+        </div>
+      </div>
+
+      <!-- Filter row -->
+      <div class="filter-row">
+        <div class="filter-pill">📍 Şehir <span class="filter-arrow">▾</span></div>
+        <div class="filter-pill">📁 Kategori <span class="filter-arrow">▾</span></div>
+        <div class="filter-pill">⏱ Tür <span class="filter-arrow">▾</span></div>
+      </div>
+
+      <!-- Job cards -->
+      <div class="job-list">
+        <div class="job-card">
+          <div class="job-logo">K</div>
+          <div class="job-info">
+            <div class="job-title">Kıdemli Yazılım Geliştirici</div>
+            <div class="job-company">Koç Holding A.Ş.</div>
+            <div class="job-tags">
+              <span class="job-tag">📍 İstanbul</span>
+              <span class="job-tag">💼 Tam Zamanlı</span>
+              <span class="job-tag job-tag-blue">Kariyer.net</span>
+            </div>
+            <div class="job-time">🕐 2 gün önce</div>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-logo" style="background:#e0f2fe;color:#0369a1;">S</div>
+          <div class="job-info">
+            <div class="job-title">Muhasebe Uzmanı</div>
+            <div class="job-company">Sabancı Üniversitesi</div>
+            <div class="job-tags">
+              <span class="job-tag">📍 Ankara</span>
+              <span class="job-tag">💼 Sözleşmeli</span>
+              <span class="job-tag job-tag-blue">Memurlar.net</span>
+            </div>
+            <div class="job-time">🕐 5 saat önce</div>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-logo" style="background:#fef3c7;color:#92400e;">A</div>
+          <div class="job-info">
+            <div class="job-title">Pazarlama Koordinatörü</div>
+            <div class="job-company">Arçelik A.Ş.</div>
+            <div class="job-tags">
+              <span class="job-tag">📍 İzmir</span>
+              <span class="job-tag">💼 Tam Zamanlı</span>
+              <span class="job-tag job-tag-blue">Eleman.net</span>
+            </div>
+            <div class="job-time">🕐 1 gün önce</div>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-logo" style="background:#f0fdf4;color:#166534;">Y</div>
+          <div class="job-info">
+            <div class="job-title">İnsan Kaynakları Sorumlusu</div>
+            <div class="job-company">Yeni Bir İş</div>
+            <div class="job-tags">
+              <span class="job-tag">📍 Bursa</span>
+              <span class="job-tag">💼 Tam Zamanlı</span>
+              <span class="job-tag job-tag-blue">Yenibiris.com</span>
+            </div>
+            <div class="job-time">🕐 3 gün önce</div>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-logo" style="background:#fdf4ff;color:#7e22ce;">T</div>
+          <div class="job-info">
+            <div class="job-title">Veri Analisti</div>
+            <div class="job-company">Turkcell Teknoloji</div>
+            <div class="job-tags">
+              <span class="job-tag">📍 İstanbul</span>
+              <span class="job-tag">💼 Staj</span>
+              <span class="job-tag job-tag-blue">İşbul.net</span>
+            </div>
+            <div class="job-time">🕐 Bugün</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Nav -->
+      <div class="bottom-nav">
+        <div class="nav-item active">
+          <div class="nav-icon">🏠</div>
+          <div>İlanlar</div>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">🔍</div>
+          <div>Ara</div>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">❤️</div>
+          <div>Favoriler</div>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon">⚙️</div>
+          <div>Ayarlar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: Job Detail -->
+  <div class="screen-wrap">
+    <div class="screen-label">2 — İlan Detayı</div>
+    <div class="phone">
+      <div class="status-bar">
+        <span>9:41</span>
+        <div class="status-icons"><span>📶</span><span>🔋</span></div>
+      </div>
+      <div class="detail-app-bar">
+        <span class="back-btn">←</span>
+        <div class="detail-bar-title">İlan Detayı</div>
+        <span style="font-size:1.1rem;">⋮</span>
+      </div>
+      <div class="wave-spacer" style="background: linear-gradient(to bottom right, #1d4ed8 50%, #f1f5f9 50%);"></div>
+
+      <div class="detail-scroll">
+        <!-- Header card -->
+        <div class="detail-header">
+          <div class="detail-logo">K</div>
+          <div>
+            <div class="detail-title">Kıdemli Yazılım Geliştirici</div>
+            <div class="detail-company">Koç Holding A.Ş.</div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="detail-tags">
+          <div class="detail-tag">📍 İstanbul</div>
+          <div class="detail-tag">💼 Tam Zamanlı</div>
+          <div class="detail-tag">📁 Bilişim</div>
+          <div class="detail-tag">🕐 2 gün önce</div>
+          <div class="detail-tag detail-source-tag">🌐 Kariyer.net</div>
+        </div>
+
+        <!-- Description -->
+        <div class="detail-desc-card">
+          <div class="desc-section-title">İlan Açıklaması</div>
+          <div class="desc-text">
+            <div class="desc-bullet">5+ yıl .NET / C# deneyimi</div>
+            <div class="desc-bullet">Mikroservis mimarisine hakim olmak</div>
+            <div class="desc-bullet">SQL Server / PostgreSQL bilgisi</div>
+            <div class="desc-bullet">Takım çalışmasına yatkın</div>
+            <br>
+            <div style="font-weight:600;margin-bottom:6px;font-size:0.75rem;">Şirket Hakkında</div>
+            <div>Koç Holding, Türkiye'nin önde gelen sanayi ve hizmet gruplarından biridir. Dinamik ve yenilikçi bir ortamda çalışmak için sizi ekibimize davet ediyoruz.</div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="detail-actions">
+          <div class="btn-primary">🔗 İlana Git</div>
+          <div class="btn-secondary">⬆️</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Filters -->
+  <div class="screen-wrap">
+    <div class="screen-label">3 — Filtreler (Bottom Sheet)</div>
+    <div class="phone">
+      <div class="status-bar">
+        <span>9:41</span>
+        <div class="status-icons"><span>📶</span><span>🔋</span></div>
+      </div>
+      <!-- Dimmed background -->
+      <div style="flex:1;background:rgba(0,0,0,0.4);display:flex;flex-direction:column;justify-content:flex-end;">
+        <!-- Bottom sheet -->
+        <div style="background:#fff;border-radius:20px 20px 0 0;padding:16px 16px 24px;">
+          <!-- Handle -->
+          <div style="width:36px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 14px;"></div>
+          <div style="font-weight:700;font-size:1rem;color:#1e293b;margin-bottom:14px;">Filtrele</div>
+
+          <!-- City -->
+          <div style="font-size:0.72rem;font-weight:700;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px;">📍 Şehir</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+            <div style="padding:6px 12px;border-radius:8px;background:#2563eb;color:#fff;font-size:0.75rem;font-weight:600;">İstanbul</div>
+            <div style="padding:6px 12px;border-radius:8px;background:#f1f5f9;color:#374151;font-size:0.75rem;">Ankara</div>
+            <div style="padding:6px 12px;border-radius:8px;background:#f1f5f9;color:#374151;font-size:0.75rem;">İzmir</div>
+            <div style="padding:6px 12px;border-radius:8px;background:#f1f5f9;color:#374151;font-size:0.75rem;">Bursa</div>
+            <div style="padding:6px 12px;border-radius:8px;background:#f1f5f9;color:#374151;font-size:0.75rem;">Antalya</div>
+            <div style="padding:6px 12px;border-radius:8px;background:#f1f5f9;color:#374151;font-size:0.75rem;">Tüm Şehirler...</div>
+          </div>
+
+          <!-- Job Type -->
+          <div style="font-size:0.72rem;font-weight:700;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px;">⏱ Çalışma Şekli</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+            <div style="padding:6px 12px;border-radius:8px;background:#f1f5f9;color:#374151;font-size:0.75rem;">Tümü</div>
+            <div style="padding:6px 12px;border-radius:8px;background:#2563eb;color:#fff;font-size:0.75rem;font-weight:600;">Tam Zamanlı</div>
+            <div style="padding:6px 12px;border-radius:8px;background:#f1f5f9;color:#374151;font-size:0.75rem;">Sözleşmeli</div>
+            <div style="padding:6px 12px;border-radius:8px;background:#f1f5f9;color:#374151;font-size:0.75rem;">Staj</div>
+            <div style="padding:6px 12px;border-radius:8px;background:#f1f5f9;color:#374151;font-size:0.75rem;">Memur</div>
+          </div>
+
+          <!-- Category -->
+          <div style="font-size:0.72rem;font-weight:700;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px;">📁 Kategori</div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <span style="font-size:0.8rem;color:#374151;">Bilişim ve Teknoloji</span>
+            <span style="color:#94a3b8;font-size:0.8rem;">▾</span>
+          </div>
+
+          <!-- Buttons -->
+          <div style="display:flex;gap:8px;">
+            <div style="flex:1;padding:12px;border-radius:12px;border:1.5px solid #e2e8f0;text-align:center;font-weight:600;font-size:0.82rem;color:#374151;">Temizle</div>
+            <div style="flex:2;padding:12px;border-radius:12px;background:#2563eb;text-align:center;font-weight:700;font-size:0.82rem;color:#fff;box-shadow:0 4px 12px rgba(37,99,235,0.35);">Uygula</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center;margin-top:28px;padding:16px;background:#fff;border-radius:16px;max-width:700px;margin-left:auto;margin-right:auto;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+  <div style="font-weight:700;color:#1e293b;margin-bottom:10px;">📋 Planlanan Ekranlar & Özellikler</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;">
+    <div style="background:#f8fafc;padding:10px 12px;border-radius:10px;font-size:0.78rem;">
+      <strong>Ekran 1 — İş İlanları</strong><br>
+      Arama kutusu · Kaynak chip filtresi · Şehir/Kategori/Tür filtresi · Sonsuz scroll (pagination)
+    </div>
+    <div style="background:#f8fafc;padding:10px 12px;border-radius:10px;font-size:0.78rem;">
+      <strong>Ekran 2 — İlan Detayı</strong><br>
+      Logo · Başlık/şirket · Etiketler · HTML açıklama (WebView) · "İlana Git" butonu
+    </div>
+    <div style="background:#f8fafc;padding:10px 12px;border-radius:10px;font-size:0.78rem;">
+      <strong>Ekran 3 — Filtreler</strong><br>
+      Bottom sheet modal · Şehir seçimi · Çalışma türü · Kategori dropdown
+    </div>
+    <div style="background:#f8fafc;padding:10px 12px;border-radius:10px;font-size:0.78rem;">
+      <strong>API & Servisler</strong><br>
+      HttpClient → IsArama.Api · DTO modeller · Sayfalama · Hata yönetimi
+    </div>
+  </div>
+  <div style="margin-top:12px;font-size:0.75rem;color:#64748b;">
+    Onay verirseniz kodlamaya başlıyoruz — sırayla ekran ekran gidelim.
+  </div>
+</div>
+
+</body>
+</html>

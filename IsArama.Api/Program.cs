@@ -19,6 +19,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Scrapers
 builder.Services.AddScoped<IScraper, KariyerNetScraper>();
 builder.Services.AddScoped<IScraper, ElemanNetScraper>();
+builder.Services.AddScoped<IScraper, YenibirisComScraper>();
+builder.Services.AddScoped<IScraper, SecretcvComScraper>();
+builder.Services.AddScoped<IScraper, MemurlarNetScraper>();
+builder.Services.AddScoped<IScraper, LinkedInTrScraper>();
+builder.Services.AddScoped<IScraper, IsbulNetScraper>();
 builder.Services.AddScoped<HashService>();
 builder.Services.AddScoped<ScraperOrchestrator>();
 

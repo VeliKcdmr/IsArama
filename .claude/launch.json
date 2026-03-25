@@ -4,20 +4,14 @@
     {
       "name": "IsArama.Web",
       "runtimeExecutable": "dotnet",
-      "runtimeArgs": ["run", "--project", "IsArama.Web", "--launch-profile", "http"],
+      "runtimeArgs": ["run", "--project", "IsArama.Web/IsArama.Web.csproj", "--launch-profile", "http"],
       "port": 5001
     },
     {
       "name": "IsArama.Api",
       "runtimeExecutable": "dotnet",
-      "runtimeArgs": ["run", "--project", "IsArama.Api", "--launch-profile", "http"],
+      "runtimeArgs": ["run", "--project", "IsArama.Api/IsArama.Api.csproj", "--launch-profile", "http"],
       "port": 5160
-    },
-    {
-      "name": "IsArama.Mobile",
-      "runtimeExecutable": "dotnet",
-      "runtimeArgs": ["build", "IsArama.Mobile", "-f", "net10.0-android"],
-      "port": 0
     }
   ]
 }

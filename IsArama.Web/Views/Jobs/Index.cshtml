@@ -1,8 +1,13 @@
 ﻿@model List<IsArama.Data.Entities.Job>
 @{
     ViewData["Title"] = "İş İlanları";
-    int currentPage = ViewBag.Page;
-    int totalPages = ViewBag.TotalPages;
+    int currentPage  = ViewBag.Page;
+    int totalPages   = ViewBag.TotalPages;
+    string? qVal      = ViewBag.Q as string;
+    string? cityVal   = ViewBag.City as string;
+    int?    catVal    = ViewBag.CategoryId as int?;
+    string? typeVal   = ViewBag.JobType as string;
+    int?    sourceVal = ViewBag.SourceId as int?;
 }
 
 <div class="container-fluid py-4">
@@ -17,7 +22,7 @@
                         <!-- Arama -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold small">Arama</label>
-                            <input type="text" name="q" value="@ViewBag.Q"
+                            <input type="text" name="q" value="@qVal"
                                    class="form-control" placeholder="Pozisyon veya şirket..." />
                         </div>
 
@@ -28,7 +33,7 @@
                                 <option value="">Tüm Şehirler</option>
                                 @foreach (var city in ViewBag.Cities)
                                 {
-                                    <option value="@city" selected="@(ViewBag.City == city)">@city</option>
+                                    <option value="@city" selected="@(cityVal == (string)city)">@city</option>
                                 }
                             </select>
                         </div>
@@ -40,7 +45,7 @@
                                 <option value="">Tüm Kategoriler</option>
                                 @foreach (var cat in ViewBag.Categories)
                                 {
-                                    <option value="@cat.Id" selected="@(ViewBag.CategoryId == cat.Id)">@cat.Name</option>
+                                    <option value="@cat.Id" selected="@(catVal == (int)cat.Id)">@cat.Name</option>
                                 }
                             </select>
                         </div>
@@ -50,10 +55,22 @@
                             <label class="form-label fw-semibold small">İş Tipi</label>
                             <select name="jobType" class="form-select">
                                 <option value="">Tümü</option>
-                                <option value="Tam Zamanlı" selected="@(ViewBag.JobType == "Tam Zamanlı")">Tam Zamanlı</option>
-                                <option value="Yarı Zamanlı" selected="@(ViewBag.JobType == "Yarı Zamanlı")">Yarı Zamanlı</option>
-                                <option value="Uzaktan" selected="@(ViewBag.JobType == "Uzaktan")">Uzaktan</option>
-                                <option value="Staj" selected="@(ViewBag.JobType == "Staj")">Staj</option>
+                                <option value="Tam Zamanlı"  selected="@(typeVal == "Tam Zamanlı")">Tam Zamanlı</option>
+                                <option value="Yarı Zamanlı" selected="@(typeVal == "Yarı Zamanlı")">Yarı Zamanlı</option>
+                                <option value="Uzaktan"      selected="@(typeVal == "Uzaktan")">Uzaktan</option>
+                                <option value="Staj"         selected="@(typeVal == "Staj")">Staj</option>
+                            </select>
+                        </div>
+
+                        <!-- Kaynak -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Kaynak</label>
+                            <select name="sourceId" class="form-select">
+                                <option value="">Tüm Kaynaklar</option>
+                                @foreach (var src in ViewBag.Sources)
+                                {
+                                    <option value="@src.Id" selected="@(sourceVal == (int)src.Id)">@src.Name</option>
+                                }
                             </select>
                         </div>
 
@@ -76,6 +93,46 @@
                 </h5>
             </div>
 
+            <!-- KAYNAK ÇUBUĞU -->
+            @{
+                var baseParams = new System.Collections.Generic.List<string>();
+                if (!string.IsNullOrWhiteSpace(qVal))   baseParams.Add($"q={Uri.EscapeDataString(qVal)}");
+                if (!string.IsNullOrWhiteSpace(cityVal)) baseParams.Add($"city={Uri.EscapeDataString(cityVal)}");
+                if (catVal.HasValue)                     baseParams.Add($"categoryId={catVal}");
+                if (!string.IsNullOrWhiteSpace(typeVal)) baseParams.Add($"jobType={Uri.EscapeDataString(typeVal)}");
+                var baseQuery = string.Join("&", baseParams);
+                var allUrl    = string.IsNullOrEmpty(baseQuery) ? "/Jobs" : $"/Jobs?{baseQuery}";
+                var counts    = (System.Collections.Generic.Dictionary<int,int>)ViewBag.SourceCounts;
+            }
+            <div class="source-bar mb-4">
+                <a href="@allUrl"
+                   class="source-chip @(sourceVal == null ? "source-chip-active" : "")">
+                    <span class="source-chip-label">Tümü</span>
+                    <span class="source-chip-count">@ViewBag.TotalAll</span>
+                </a>
+                @foreach (var src in ViewBag.Sources)
+                {
+                    int srcId = (int)src.Id;
+                    int cnt   = counts.GetValueOrDefault(srcId, 0);
+                    if (cnt == 0) continue;
+                    bool active   = sourceVal == srcId;
+                    string srcQ   = string.IsNullOrEmpty(baseQuery) ? $"sourceId={srcId}" : $"{baseQuery}&sourceId={srcId}";
+                    string chipHref = active ? allUrl : $"/Jobs?{srcQ}";
+                    <a href="@chipHref"
+                       class="source-chip @(active ? "source-chip-active" : "")">
+                        <img src="https://www.google.com/s2/favicons?domain=@src.BaseUrl&sz=16"
+                             width="16" height="16" alt="@src.Name" class="source-chip-icon">
+                        <span class="source-chip-label">@src.Name</span>
+                        <span class="source-chip-count">@cnt</span>
+                    </a>
+                }
+            </div>
+
+            <!-- SAYFALAMA - ÜST -->
+            <div class="mb-4">
+                @await Html.PartialAsync("_PaginationPartial")
+            </div>
+
             @if (!Model.Any())
             {
                 <div class="alert alert-info text-center py-5">
@@ -95,65 +152,63 @@
                                  data-job-id="@job.Id"
                                  data-bs-toggle="modal"
                                  data-bs-target="#jobModal">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="badge bg-primary">@job.Source.Name</span>
-                                        <span class="badge bg-light text-dark border">@job.JobType</span>
+                                <div class="card-body d-flex flex-column p-4">
+                                    <!-- Üst: Logo | Şirket + Başlık | Zaman -->
+                                    <div class="d-flex gap-3 mb-3">
+                                        <!-- Sol: Logo -->
+                                        <div style="flex-shrink:0;">
+                                            @if (!string.IsNullOrWhiteSpace(job.Company.LogoUrl))
+                                            {
+                                                <img src="@job.Company.LogoUrl" alt="@job.Company.Name"
+                                                     style="width:88px;height:88px;object-fit:contain;border-radius:12px;border:1px solid #e2e8f0;padding:5px;">
+                                            }
+                                            else
+                                            {
+                                                <div style="width:88px;height:88px;border-radius:12px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#64748b;font-size:1.8em;">
+                                                    @job.Company.Name.Substring(0, 1).ToUpper()
+                                                </div>
+                                            }
+                                        </div>
+                                        <!-- Orta: Şirket adı + Başlık -->
+                                        <div class="overflow-hidden flex-grow-1">
+                                            <div class="fw-semibold text-truncate" style="font-size:1em;">@job.Company.Name</div>
+                                            <h6 class="fw-bold mb-0 mt-1" style="line-height:1.4;font-size:1.05em;">@job.Title</h6>
+                                        </div>
+                                        <!-- Sağ üst: Zaman -->
+                                        <div class="text-muted" style="font-size:0.78em;white-space:nowrap;flex-shrink:0;">
+                                            <i class="bi bi-clock me-1"></i>@DateHelper.ToRelative(job.PublishedAt)
+                                        </div>
                                     </div>
-                                    <h6 class="fw-bold mb-1">@job.Title</h6>
-                                    <p class="text-muted small mb-2">@job.Company.Name</p>
-                                    <div class="d-flex gap-3 text-muted small">
-                                        <span><i class="bi bi-geo-alt me-1"></i>@job.City</span>
-                                        <span><i class="bi bi-tag me-1"></i>@job.Category.Name</span>
+                                    <!-- Alt: Badge'ler + Kaynak site sağda -->
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mt-auto pt-2 border-top">
+                                        <span class="badge rounded-pill bg-light text-secondary border" style="font-size:0.78em;font-weight:500;">
+                                            <i class="bi bi-geo-alt me-1"></i>@job.City
+                                        </span>
+                                        @if (job.Category.Name != "Diğer")
+                                        {
+                                            <span class="badge rounded-pill bg-light text-secondary border" style="font-size:0.78em;font-weight:500;">
+                                                <i class="bi bi-tag me-1"></i>@job.Category.Name
+                                            </span>
+                                        }
+                                        <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size:0.78em;font-weight:500;">
+                                            @job.JobType
+                                        </span>
+                                        <div class="d-flex align-items-center gap-1 ms-auto">
+                                            <img src="https://www.google.com/s2/favicons?domain=@job.Source.BaseUrl&sz=16"
+                                                 style="width:18px;height:18px;" alt="@job.Source.Name">
+                                            <span class="text-muted" style="font-size:0.78em;">@job.Source.Name</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="card-footer bg-transparent border-0 text-muted small">
-                                    <i class="bi bi-clock me-1"></i>@DateHelper.ToRelative(job.PublishedAt)
                                 </div>
                             </div>
                         </div>
                     }
                 </div>
 
-                <!-- SAYFALAMA -->
-                @if (totalPages > 1)
-                {
-                    <nav class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                                <a class="page-link" asp-action="Index"
-                                       asp-route-q="@ViewBag.Q"
-                                       asp-route-city="@ViewBag.City"
-                                       asp-route-categoryId="@ViewBag.CategoryId"
-                                       asp-route-jobType="@ViewBag.JobType"
-                                       asp-route-page="@(currentPage - 1)">
-                                    <i class="bi bi-chevron-left"></i>
-                                </a>
-                            </li>
-                            @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
-                            {
-                                <li class="page-item @(i == currentPage ? "active" : "")">
-                                    <a class="page-link" asp-action="Index"
-                                       asp-route-q="@ViewBag.Q"
-                                       asp-route-city="@ViewBag.City"
-                                       asp-route-categoryId="@ViewBag.CategoryId"
-                                       asp-route-jobType="@ViewBag.JobType"
-                                       asp-route-page="@i">@i</a>
-                                </li>
-                            }
-                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                                <a class="page-link" asp-action="Index"
-                                       asp-route-q="@ViewBag.Q"
-                                       asp-route-city="@ViewBag.City"
-                                       asp-route-categoryId="@ViewBag.CategoryId"
-                                       asp-route-jobType="@ViewBag.JobType"
-                                       asp-route-page="@(currentPage + 1)">
-                                    <i class="bi bi-chevron-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                }
+                <!-- SAYFALAMA - ALT -->
+                <div class="mt-5">
+                    @await Html.PartialAsync("_PaginationPartial")
+                </div>
             }
         </div>
     </div>

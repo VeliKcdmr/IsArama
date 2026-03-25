@@ -1,5 +1,8 @@
-﻿using HtmlAgilityPack;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using IsArama.Scraper.Dto;
+using IsArama.Scraper.Helpers;
 using IsArama.Scraper.Interfaces;
 
 namespace IsArama.Scraper.Scrapers;
@@ -8,54 +11,64 @@ public class KariyerNetScraper : IScraper
 {
     public string SourceName => "Kariyer.net";
 
+    private const string ApiUrl = "https://candidatesearchapigateway.kariyer.net/search";
+    private const string DefaultLogo = "firma-logosuz";
+
     public async Task<List<JobDto>> ScrapeAsync()
     {
         var jobs = new List<JobDto>();
-        var web = new HtmlWeb();
-        web.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36";
+
+        using var http = new HttpClient();
+        http.DefaultRequestHeaders.Add("User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
+
+        // Çalışma şekli URL'leri: normal + yarı zamanlı + staj + uzaktan
+        var searchUrls = new[]
+        {
+            (Url: ApiUrl,                                                              Pages: 25),
+            (Url: "https://candidatesearchapigateway.kariyer.net/search?calistirma-sekli=yari-zamanli", Pages: 5),
+            (Url: "https://candidatesearchapigateway.kariyer.net/search?calistirma-sekli=staj",         Pages: 5),
+            (Url: "https://candidatesearchapigateway.kariyer.net/search?calistirma-sekli=uzaktan",      Pages: 5),
+        };
 
         try
         {
-            for (int page = 1; page <= 5; page++)
+            foreach (var (url, maxPages) in searchUrls)
+            for (int page = 1; page <= maxPages; page++)
             {
-                var url = $"https://www.kariyer.net/is-ilanlari?page={page}";
-                var doc = await web.LoadFromWebAsync(url);
+                var payload = new { page, pageSize = 20 };
+                var response = await http.PostAsJsonAsync(url, payload);
+                if (!response.IsSuccessStatusCode) break;
 
-                var nodes = doc.DocumentNode
-                    .SelectNodes("//div[@data-test='ad-card']");
+                var json = await response.Content.ReadFromJsonAsync<KariyerResponse>();
+                var items = json?.Data?.Jobs?.Items;
+                if (items == null || items.Count == 0) break;
 
-                if (nodes == null || !nodes.Any()) break;
-
-                foreach (var node in nodes)
+                foreach (var item in items)
                 {
-                    // Data attribute'lardan çek
-                    var title = node.GetAttributeValue("positionname", "").Trim();
-                    var city = node.GetAttributeValue("cityname", "").Trim();
-                    var workType = node.GetAttributeValue("worktypetext", "Tam Zamanlı").Trim();
+                    if (string.IsNullOrWhiteSpace(item.Title) || string.IsNullOrWhiteSpace(item.JobUrl))
+                        continue;
 
-                    // Şirket adı
-                    var company = node.SelectSingleNode(".//span[@data-test='subtitle']")
-                                  ?.InnerText.Trim();
+                    // squareLogoUrl → zaten tam URL, boşsa logoUrl prefix ile
+                    var logoUrl = item.SquareLogoUrl ?? "";
+                    if (string.IsNullOrWhiteSpace(logoUrl) && !string.IsNullOrWhiteSpace(item.LogoUrl))
+                        logoUrl = $"https://img-kariyer.mncdn.com/UploadFiles/Clients/Logolar/{item.LogoUrl}";
 
-                    // Link
-                    var link = node.SelectSingleNode(".//a[@data-test='ad-card-item']")
-                               ?.GetAttributeValue("href", "");
-
-                    if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(link)) continue;
+                    var city = CityNormalizer.Normalize(item.LocationText ?? item.AllLocations);
 
                     jobs.Add(new JobDto
                     {
-                        Title = title,
-                        CompanyName = string.IsNullOrWhiteSpace(company) ? "Belirtilmemiş" : company,
-                        City = string.IsNullOrWhiteSpace(city) ? "Belirtilmemiş" : city,
-                        JobType = workType,
-                        OriginalUrl = link.StartsWith("http") ? link : $"https://www.kariyer.net{link}",
-                        PublishedAt = ParseKariyerDate(node.GetAttributeValue("time", ""))
+                        Title          = item.Title,
+                        CompanyName    = string.IsNullOrWhiteSpace(item.CompanyName) ? "Belirtilmemiş" : item.CompanyName,
+                        CompanyLogoUrl = logoUrl,
+                        City           = city,
+                        JobType        = NormalizeJobType(item.WorkTypeText ?? item.WorkType ?? ""),
+                        OriginalUrl    = item.JobUrl.StartsWith("http") ? item.JobUrl : $"https://www.kariyer.net{item.JobUrl}",
+                        PublishedAt    = DateTime.TryParse(item.PostingDate, out var dt) ? dt : DateTime.UtcNow
                     });
-
                 }
 
-                await Task.Delay(2000);
+                await Task.Delay(1000);
             }
         }
         catch (Exception ex)
@@ -66,28 +79,45 @@ public class KariyerNetScraper : IScraper
         return jobs;
     }
 
-    private static DateTime ParseKariyerDate(string timeText)
+
+    private static string NormalizeJobType(string raw)
     {
-        if (string.IsNullOrWhiteSpace(timeText)) return DateTime.UtcNow;
-
-        timeText = timeText.Trim().ToLower();
-
-        if (timeText.Contains("bugün") || timeText.Contains("saat") || timeText.Contains("dakika"))
-            return DateTime.UtcNow;
-
-        if (timeText.Contains("dün"))
-            return DateTime.UtcNow.AddDays(-1);
-
-        // "3 gün", "5 gün" gibi
-        var parts = timeText.Split(' ');
-        if (parts.Length >= 2 && int.TryParse(parts[0], out int days) && parts[1].Contains("gün"))
-            return DateTime.UtcNow.AddDays(-days);
-
-        // "2 hafta"
-        if (parts.Length >= 2 && int.TryParse(parts[0], out int weeks) && parts[1].Contains("hafta"))
-            return DateTime.UtcNow.AddDays(-weeks * 7);
-
-        return DateTime.UtcNow;
+        if (string.IsNullOrWhiteSpace(raw)) return "Tam Zamanlı";
+        if (raw.Contains("PartTime") || raw.Contains("Yarı") || raw.Contains("Part Time")) return "Yarı Zamanlı";
+        if (raw.Contains("Internship") || raw.Contains("Staj")) return "Staj";
+        if (raw.Contains("Remote") || raw.Contains("Uzaktan")) return "Uzaktan";
+        if (raw.Contains("Freelance") || raw.Contains("Serbest")) return "Freelance";
+        if (raw.Contains("Seasonal") || raw.Contains("Dönemsel")) return "Dönemsel";
+        return "Tam Zamanlı";
     }
 
+    // JSON model sınıfları
+    private class KariyerResponse
+    {
+        [JsonPropertyName("data")] public KariyerData? Data { get; set; }
+    }
+
+    private class KariyerData
+    {
+        [JsonPropertyName("jobs")] public KariyerJobs? Jobs { get; set; }
+    }
+
+    private class KariyerJobs
+    {
+        [JsonPropertyName("items")] public List<KariyerJobItem>? Items { get; set; }
+    }
+
+    private class KariyerJobItem
+    {
+        [JsonPropertyName("title")]           public string? Title           { get; set; }
+        [JsonPropertyName("companyName")]     public string? CompanyName     { get; set; }
+        [JsonPropertyName("jobUrl")]          public string? JobUrl          { get; set; }
+        [JsonPropertyName("logoUrl")]         public string? LogoUrl         { get; set; }
+        [JsonPropertyName("squareLogoUrl")]   public string? SquareLogoUrl   { get; set; }
+        [JsonPropertyName("locationText")]    public string? LocationText    { get; set; }
+        [JsonPropertyName("allLocations")]    public string? AllLocations    { get; set; }
+        [JsonPropertyName("workType")]        public string? WorkType        { get; set; }
+        [JsonPropertyName("workTypeText")]    public string? WorkTypeText    { get; set; }
+        [JsonPropertyName("postingDate")]     public string? PostingDate     { get; set; }
+    }
 }

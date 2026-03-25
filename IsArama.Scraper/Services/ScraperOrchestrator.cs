@@ -1,5 +1,6 @@
 ﻿using IsArama.Data.Context;
 using IsArama.Data.Entities;
+using IsArama.Scraper.Helpers;
 using IsArama.Scraper.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,20 +45,26 @@ public class ScraperOrchestrator
                 var company = await _db.Companies.FirstOrDefaultAsync(c => c.Name == dto.CompanyName);
                 if (company == null)
                 {
-                    company = new Company { Name = dto.CompanyName };
+                    company = new Company { Name = dto.CompanyName, LogoUrl = dto.CompanyLogoUrl };
                     _db.Companies.Add(company);
                     await _db.SaveChangesAsync();
                 }
+                else if (string.IsNullOrWhiteSpace(company.LogoUrl) && !string.IsNullOrWhiteSpace(dto.CompanyLogoUrl))
+                {
+                    company.LogoUrl = dto.CompanyLogoUrl;
+                    await _db.SaveChangesAsync();
+                }
 
-                var category = await _db.Categories.FirstOrDefaultAsync(c => c.Name == dto.CategoryName)
+                var categoryName = CategoryClassifier.Classify(dto.Title);
+                var category = await _db.Categories.FirstOrDefaultAsync(c => c.Name == categoryName)
                                ?? await _db.Categories.FirstAsync(c => c.Name == "Diğer");
 
                 _db.Jobs.Add(new Job
                 {
-                    Title = dto.Title,
+                    Title = dto.Title?.Length > 300 ? dto.Title[..300] : dto.Title,
                     Description = dto.Description,
-                    City = dto.City,
-                    JobType = dto.JobType,
+                    City = dto.City?.Length > 100 ? dto.City[..100] : dto.City,
+                    JobType = dto.JobType?.Length > 50 ? dto.JobType[..50] : dto.JobType,
                     OriginalUrl = dto.OriginalUrl,
                     Hash = hash,
                     PublishedAt = dto.PublishedAt,

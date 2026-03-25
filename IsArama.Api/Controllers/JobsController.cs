@@ -19,6 +19,7 @@ public class JobsController : ControllerBase
         [FromQuery] string? city,
         [FromQuery] int? categoryId,
         [FromQuery] string? jobType,
+        [FromQuery] string? source,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
@@ -39,6 +40,9 @@ public class JobsController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(jobType))
             query = query.Where(j => j.JobType == jobType);
+
+        if (!string.IsNullOrWhiteSpace(source))
+            query = query.Where(j => j.Source.Name == source);
 
         var total = await query.CountAsync();
 

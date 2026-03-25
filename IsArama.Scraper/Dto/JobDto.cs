@@ -4,6 +4,7 @@ public class JobDto
 {
     public string Title { get; set; } = null!;
     public string CompanyName { get; set; } = null!;
+    public string CompanyLogoUrl { get; set; } = "";
     public string City { get; set; } = null!;
     public string JobType { get; set; } = "Tam Zamanlı";
     public string? Description { get; set; }
