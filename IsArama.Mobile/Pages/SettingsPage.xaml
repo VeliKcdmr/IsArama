@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="IsArama.Mobile.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:IsArama.Mobile.ViewModels"
+    Title=""
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="{StaticResource Background}">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0"
+                             BackgroundColor="{StaticResource PrimaryDark}"
+                             Padding="16,48,16,20"
+                             Spacing="4">
+            <Label Text="⚙️ Ayarlar"
+                   FontSize="22" FontAttributes="Bold" TextColor="White" />
+            <Label Text="Uygulama tercihleri"
+                   FontSize="12" TextColor="#aac4ff" />
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16" Spacing="12">
+
+                <!-- Görünüm Ayarları -->
+                <Border BackgroundColor="{StaticResource Surface}"
+                        Stroke="#e8edf2" StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="LİSTELEME" FontSize="11" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <BoxView HeightRequest="1" BackgroundColor="{StaticResource Border}" />
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="Sayfalama"
+                                       FontSize="14" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextPrimary}" />
+                                <Label Text="Açık: 20 ilan/sayfa  •  Kapalı: tüm ilanlar"
+                                       FontSize="11"
+                                       TextColor="{StaticResource TextSecondary}" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1"
+                                    IsToggled="{Binding UsePagination}"
+                                    OnColor="{StaticResource Primary}"
+                                    VerticalOptions="Center" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Bağlantı Durumu -->
+                <Border BackgroundColor="{StaticResource Surface}"
+                        Stroke="#e8edf2" StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="16">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="BAĞLANTI" FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextSecondary}" />
+                            <Border Grid.Column="1"
+                                    BackgroundColor="{StaticResource Background}"
+                                    Stroke="{StaticResource Border}"
+                                    StrokeShape="RoundRectangle 8" Padding="10,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding CheckConnectionCommand}" />
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="4">
+                                    <ActivityIndicator IsRunning="{Binding IsChecking}"
+                                                       IsVisible="{Binding IsChecking}"
+                                                       Color="{StaticResource Primary}"
+                                                       WidthRequest="12" HeightRequest="12" />
+                                    <Label Text="Test Et" FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource Primary}" />
+                                </HorizontalStackLayout>
+                            </Border>
+                        </Grid>
+                        <BoxView HeightRequest="1" BackgroundColor="{StaticResource Border}" />
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="API Adresi"
+                                   FontSize="13" TextColor="{StaticResource TextPrimary}" />
+                            <Label Grid.Column="1" Text="{Binding ApiUrl}"
+                                   FontSize="11" TextColor="{StaticResource TextSecondary}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Durum"
+                                   FontSize="13" TextColor="{StaticResource TextPrimary}" />
+                            <Label Grid.Column="1" Text="{Binding ConnectionStatus}"
+                                   FontSize="12" FontAttributes="Bold"
+                                   TextColor="{Binding ConnectionColor}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Toplam İlan"
+                                   FontSize="13" TextColor="{StaticResource TextPrimary}" />
+                            <Label Grid.Column="1" Text="{Binding TotalJobCount}"
+                                   FontSize="13" FontAttributes="Bold"
+                                   TextColor="{StaticResource Primary}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Kaynaklar -->
+                <Border BackgroundColor="{StaticResource Surface}"
+                        Stroke="#e8edf2" StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="16">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="KAYNAKLAR" FontSize="11" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <BoxView HeightRequest="1" BackgroundColor="{StaticResource Border}" />
+                        <Label Text="kariyer.net" FontSize="14" TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="eleman.net" FontSize="14" TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="yenibiris.com" FontSize="14" TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="secretcv.com" FontSize="14" TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="memurlar.net" FontSize="14" TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="linkedin.com" FontSize="14" TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="isbul.net" FontSize="14" TextColor="{StaticResource TextPrimary}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Uygulama Bilgisi -->
+                <Border BackgroundColor="{StaticResource Surface}"
+                        Stroke="#e8edf2" StrokeThickness="1"
+                        StrokeShape="RoundRectangle 14"
+                        Padding="16">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="HAKKINDA" FontSize="11" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <BoxView HeightRequest="1" BackgroundColor="{StaticResource Border}" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Uygulama"
+                                   FontSize="14" TextColor="{StaticResource TextPrimary}" />
+                            <Label Grid.Column="1" Text="İsArama"
+                                   FontSize="14" TextColor="{StaticResource TextSecondary}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Versiyon"
+                                   FontSize="14" TextColor="{StaticResource TextPrimary}" />
+                            <Label Grid.Column="1" Text="1.0.0"
+                                   FontSize="14" TextColor="{StaticResource TextSecondary}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

@@ -65,7 +65,8 @@ RecurringJob.AddOrUpdate<ScraperOrchestrator>(
     "0 */3 * * *");
 
 app.UseCors("AllowAll");
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

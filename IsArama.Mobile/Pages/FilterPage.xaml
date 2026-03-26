@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="IsArama.Mobile.Pages.FilterPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:IsArama.Mobile.ViewModels"
+    Title=""
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="{StaticResource Background}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0"
+                             BackgroundColor="{StaticResource PrimaryDark}"
+                             Padding="16,48,16,20"
+                             Spacing="4">
+            <Label Text="🔍 Filtrele"
+                   FontSize="22" FontAttributes="Bold" TextColor="White" />
+            <Label Text="Sonuçları daraltın"
+                   FontSize="12" TextColor="#aac4ff" />
+        </VerticalStackLayout>
+
+        <!-- Filtreler -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="16" Padding="16,20,16,12">
+
+                <!-- Şehir -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="📍 ŞEHİR" FontSize="11" FontAttributes="Bold"
+                           TextColor="{StaticResource TextSecondary}" />
+                    <Border Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                            StrokeShape="RoundRectangle 10" Padding="4,0"
+                            BackgroundColor="{StaticResource Surface}">
+                        <Picker Title="Tüm Şehirler"
+                                ItemsSource="{Binding Cities}"
+                                SelectedItem="{Binding TempCity}"
+                                TextColor="{StaticResource TextPrimary}"
+                                TitleColor="{StaticResource TextMuted}" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Çalışma Türü -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="⏱ ÇALIŞMA TÜRÜ" FontSize="11" FontAttributes="Bold"
+                           TextColor="{StaticResource TextSecondary}" />
+                    <Border Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                            StrokeShape="RoundRectangle 10" Padding="4,0"
+                            BackgroundColor="{StaticResource Surface}">
+                        <Picker Title="Tümü"
+                                ItemsSource="{Binding JobTypes}"
+                                SelectedItem="{Binding TempJobType}"
+                                TextColor="{StaticResource TextPrimary}"
+                                TitleColor="{StaticResource TextMuted}" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Kategori -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="📁 KATEGORİ" FontSize="11" FontAttributes="Bold"
+                           TextColor="{StaticResource TextSecondary}" />
+                    <Border Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                            StrokeShape="RoundRectangle 10" Padding="4,0"
+                            BackgroundColor="{StaticResource Surface}">
+                        <Picker Title="Tüm Kategoriler"
+                                ItemsSource="{Binding Categories}"
+                                ItemDisplayBinding="{Binding Name}"
+                                SelectedItem="{Binding TempCategory}"
+                                TextColor="{StaticResource TextPrimary}"
+                                TitleColor="{StaticResource TextMuted}" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Aktif Filtreler Özeti -->
+                <Border IsVisible="{Binding HasActiveFilters}"
+                        BackgroundColor="#eff6ff"
+                        Stroke="#bfdbfe" StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10"
+                        Padding="12,10">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Aktif Filtreler" FontSize="11" FontAttributes="Bold"
+                               TextColor="{StaticResource Primary}" />
+                        <Label Text="{Binding ActiveFilterSummary}"
+                               FontSize="12" TextColor="{StaticResource TextPrimary}" />
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Butonlar -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,2*" ColumnSpacing="10"
+              Padding="16,12,16,32"
+              BackgroundColor="{StaticResource Surface}">
+            <Border Grid.Column="0"
+                    BackgroundColor="{StaticResource Surface}"
+                    Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                    StrokeShape="RoundRectangle 12" Padding="0,14">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ClearFilterCommand}" />
+                </Border.GestureRecognizers>
+                <Label Text="Temizle" HorizontalOptions="Center"
+                       FontAttributes="Bold" FontSize="14"
+                       TextColor="{StaticResource TextPrimary}" />
+            </Border>
+            <Border Grid.Column="1"
+                    BackgroundColor="{StaticResource Primary}"
+                    Stroke="Transparent"
+                    StrokeShape="RoundRectangle 12" Padding="0,14">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ApplyFilterCommand}" />
+                </Border.GestureRecognizers>
+                <Label Text="Uygula" HorizontalOptions="Center"
+                       FontAttributes="Bold" FontSize="14"
+                       TextColor="White" />
+            </Border>
+        </Grid>
+
+    </Grid>
+</ContentPage>

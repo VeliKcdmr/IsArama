@@ -3,12 +3,32 @@
     x:Class="IsArama.Mobile.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:IsArama.Mobile"
-    Title="IsArama.Mobile">
+    xmlns:pages="clr-namespace:IsArama.Mobile.Pages"
+    Shell.NavBarIsVisible="False"
+    Shell.TabBarBackgroundColor="#ffffff"
+    Shell.TabBarForegroundColor="#2563eb"
+    Shell.TabBarUnselectedColor="#94a3b8"
+    Shell.TabBarTitleColor="#2563eb"
+    FlyoutBehavior="Disabled">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <TabBar>
+        <ShellContent
+            Title="İlanlar"
+            Icon="tab_home.svg"
+            ContentTemplate="{DataTemplate pages:JobsPage}"
+            Route="JobsPage" />
+
+        <ShellContent
+            Title="Filtrele"
+            Icon="tab_filter.svg"
+            ContentTemplate="{DataTemplate pages:FilterPage}"
+            Route="FilterPage" />
+
+        <ShellContent
+            Title="Ayarlar"
+            Icon="tab_settings.svg"
+            ContentTemplate="{DataTemplate pages:SettingsPage}"
+            Route="SettingsPage" />
+    </TabBar>
 
 </Shell>

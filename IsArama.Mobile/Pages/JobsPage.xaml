@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Name="page"
+    x:Class="IsArama.Mobile.Pages.JobsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:IsArama.Mobile.ViewModels"
+    xmlns:models="clr-namespace:IsArama.Mobile.Models"
+    Title=""
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="{StaticResource Background}">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ── Mavi Header ── -->
+        <VerticalStackLayout Grid.Row="0"
+                             BackgroundColor="{StaticResource PrimaryDark}"
+                             Padding="16,48,16,16"
+                             Spacing="8">
+
+            <Label Text="🔍 İsArama"
+                   FontSize="22" FontAttributes="Bold" TextColor="White" />
+            <Label Text="Türkiye'nin iş ilanları"
+                   FontSize="12" TextColor="#aac4ff" Margin="0,-4,0,0" />
+
+            <Border BackgroundColor="#2d63f0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="4,0"
+                    Margin="0,4,0,0">
+                <SearchBar x:Name="MainSearchBar"
+                           Placeholder="Pozisyon veya şirket ara..."
+                           PlaceholderColor="#aac4ff"
+                           TextColor="White"
+                           BackgroundColor="Transparent"
+                           CancelButtonColor="White"
+                           Text="{Binding SearchQuery}"
+                           SearchCommand="{Binding SearchCommand}" />
+            </Border>
+        </VerticalStackLayout>
+
+        <!-- ── İçerik ── -->
+        <RefreshView Grid.Row="1"
+                     Command="{Binding RefreshCommand}"
+                     IsRefreshing="{Binding IsRefreshing}"
+                     RefreshColor="{StaticResource Primary}">
+
+            <CollectionView x:Name="JobsCollection"
+                            ItemsSource="{Binding Jobs}"
+                            RemainingItemsThreshold="5"
+                            RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
+                            BackgroundColor="{StaticResource Background}">
+
+                <!-- ── Header: chip'ler + filtre pill'leri ── -->
+                <CollectionView.Header>
+                    <VerticalStackLayout BackgroundColor="{StaticResource Background}">
+
+                        <!-- Kaynak chip'leri -->
+                        <ScrollView Orientation="Horizontal"
+                                    HorizontalScrollBarVisibility="Never"
+                                    Padding="0,12,0,0">
+                            <HorizontalStackLayout x:Name="SourceChipsLayout"
+                                                   Spacing="6"
+                                                   Padding="16,0,16,0" />
+                        </ScrollView>
+
+
+                    </VerticalStackLayout>
+                </CollectionView.Header>
+
+                <!-- ── İş kartı şablonu ── -->
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:JobListItem">
+                        <Grid Padding="12,4">
+                            <Border BackgroundColor="{StaticResource Surface}"
+                                    Stroke="#e8edf2"
+                                    StrokeThickness="1"
+                                    StrokeShape="RoundRectangle 14"
+                                    Padding="12">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding BindingContext.NavigateToDetailCommand, Source={x:Reference page}}"
+                                        CommandParameter="{Binding Id}" />
+                                </Border.GestureRecognizers>
+
+                                <Grid ColumnDefinitions="48,*" ColumnSpacing="10">
+                                    <!-- Logo -->
+                                    <Grid Grid.Column="0" WidthRequest="44" HeightRequest="44">
+                                        <Border IsVisible="{Binding HasLogo}"
+                                                Stroke="{StaticResource Border}"
+                                                StrokeThickness="1"
+                                                StrokeShape="RoundRectangle 10"
+                                                Padding="3">
+                                            <Image Source="{Binding CompanyLogo}"
+                                                   Aspect="AspectFit"
+                                                   WidthRequest="38" HeightRequest="38" />
+                                        </Border>
+                                        <Border IsVisible="{Binding HasLogo, Converter={StaticResource InverseBool}}"
+                                                BackgroundColor="{Binding LogoColor}"
+                                                Stroke="{StaticResource Border}"
+                                                StrokeThickness="1"
+                                                StrokeShape="RoundRectangle 10">
+                                            <Label Text="{Binding Initials}"
+                                                   HorizontalOptions="Center"
+                                                   VerticalOptions="Center"
+                                                   FontAttributes="Bold"
+                                                   FontSize="17"
+                                                   TextColor="#475569" />
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- İçerik -->
+                                    <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                        <Label Text="{Binding Title}"
+                                               FontSize="13" FontAttributes="Bold"
+                                               TextColor="{StaticResource TextPrimary}"
+                                               LineBreakMode="TailTruncation"
+                                               MaxLines="2" />
+                                        <Label Text="{Binding Company}"
+                                               FontSize="12"
+                                               TextColor="{StaticResource TextSecondary}"
+                                               LineBreakMode="TailTruncation" />
+                                        <FlexLayout Wrap="Wrap" Direction="Row" AlignItems="Center">
+                                            <Border BackgroundColor="{StaticResource Background}"
+                                                    Stroke="{StaticResource Border}"
+                                                    StrokeThickness="1"
+                                                    StrokeShape="RoundRectangle 6"
+                                                    Padding="5,2" Margin="0,2,4,0">
+                                                <Label Text="{Binding City, StringFormat='📍 {0}'}"
+                                                       FontSize="10" TextColor="{StaticResource TextSecondary}" />
+                                            </Border>
+                                            <Border BackgroundColor="{StaticResource Background}"
+                                                    Stroke="{StaticResource Border}"
+                                                    StrokeThickness="1"
+                                                    StrokeShape="RoundRectangle 6"
+                                                    Padding="5,2" Margin="0,2,4,0">
+                                                <Label Text="{Binding JobType}"
+                                                       FontSize="10" TextColor="{StaticResource TextSecondary}" />
+                                            </Border>
+                                            <Border BackgroundColor="{StaticResource PrimaryLight}"
+                                                    Stroke="#bfdbfe"
+                                                    StrokeThickness="1"
+                                                    StrokeShape="RoundRectangle 6"
+                                                    Padding="5,2" Margin="0,2,4,0">
+                                                <Label Text="{Binding Source}"
+                                                       FontSize="10" TextColor="{StaticResource Primary}" />
+                                            </Border>
+                                        </FlexLayout>
+                                        <Label Text="{Binding TimeAgo}"
+                                               FontSize="10"
+                                               TextColor="{StaticResource TextMuted}"
+                                               Margin="0,1,0,0" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+                <CollectionView.Footer>
+                    <VerticalStackLayout>
+                        <!-- Sonsuz scroll: yükleniyor göstergesi -->
+                        <ActivityIndicator IsRunning="{Binding IsLoadingMoreVisible}"
+                                           IsVisible="{Binding IsLoadingMoreVisible}"
+                                           Color="{StaticResource Primary}"
+                                           Margin="0,12" />
+
+                        <!-- Sayfalama: önceki / sonraki butonları -->
+                        <Grid IsVisible="{Binding UsePagination}"
+                              ColumnDefinitions="*,Auto,*"
+                              Padding="16,12,16,16">
+                            <Border Grid.Column="0"
+                                    IsVisible="{Binding HasPrevPage}"
+                                    BackgroundColor="{StaticResource Surface}"
+                                    Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                                    StrokeShape="RoundRectangle 10" Padding="0,10">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding PrevPageCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="← Önceki" HorizontalOptions="Center"
+                                       FontAttributes="Bold" FontSize="13"
+                                       TextColor="{StaticResource TextPrimary}" />
+                            </Border>
+
+                            <Label Grid.Column="1"
+                                   Text="{Binding PageInfo}"
+                                   FontSize="12" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextSecondary}"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center"
+                                   Margin="8,0" />
+
+                            <Border Grid.Column="2"
+                                    IsVisible="{Binding HasNextPage}"
+                                    BackgroundColor="{StaticResource Primary}"
+                                    Stroke="Transparent"
+                                    StrokeShape="RoundRectangle 10" Padding="0,10">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding NextPageCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Sonraki →" HorizontalOptions="Center"
+                                       FontAttributes="Bold" FontSize="13"
+                                       TextColor="White" />
+                            </Border>
+                        </Grid>
+                    </VerticalStackLayout>
+                </CollectionView.Footer>
+
+                <!-- Boş durum -->
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center"
+                                         Padding="40" Spacing="10">
+                        <Label Text="😔" FontSize="48" HorizontalOptions="Center" />
+                        <Label Text="Sonuç bulunamadı"
+                               FontAttributes="Bold" FontSize="16"
+                               HorizontalOptions="Center"
+                               TextColor="{StaticResource TextPrimary}" />
+                        <Label Text="Farklı bir arama veya filtre deneyin"
+                               FontSize="13" HorizontalOptions="Center"
+                               TextColor="{StaticResource TextSecondary}" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- ── Yükleniyor ── -->
+        <Grid Grid.RowSpan="2"
+              IsVisible="{Binding IsLoading}"
+              BackgroundColor="{StaticResource Background}">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16">
+                <ActivityIndicator IsRunning="True" Color="{StaticResource Primary}"
+                                   WidthRequest="40" HeightRequest="40" />
+                <Label Text="İlanlar yükleniyor..."
+                       TextColor="{StaticResource TextSecondary}"
+                       HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- ── Filtre Bottom Sheet ── -->
+        <Grid Grid.RowSpan="2" IsVisible="{Binding IsFilterOpen}" ZIndex="10">
+
+            <BoxView BackgroundColor="#80000000">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding CloseFilterCommand}" />
+                </BoxView.GestureRecognizers>
+            </BoxView>
+
+            <Border VerticalOptions="End"
+                    BackgroundColor="{StaticResource Surface}"
+                    Stroke="Transparent"
+                    StrokeShape="RoundRectangle 20,20,0,0">
+                <ScrollView>
+                    <VerticalStackLayout Spacing="16" Padding="20,16,20,40">
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Filtrele"
+                                   FontSize="18" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextPrimary}" />
+                            <Border Grid.Column="1"
+                                    BackgroundColor="{StaticResource Background}"
+                                    Stroke="{StaticResource Border}"
+                                    StrokeShape="RoundRectangle 8" Padding="8,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding CloseFilterCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="✕" FontSize="14" TextColor="{StaticResource TextSecondary}" />
+                            </Border>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" BackgroundColor="{StaticResource Border}" />
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="📍 ŞEHİR" FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextSecondary}" />
+                            <Border Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                                    StrokeShape="RoundRectangle 10" Padding="4,0">
+                                <Picker Title="Tüm Şehirler"
+                                        ItemsSource="{Binding Cities}"
+                                        SelectedItem="{Binding TempCity}"
+                                        TextColor="{StaticResource TextPrimary}"
+                                        TitleColor="{StaticResource TextMuted}" />
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="⏱ ÇALIŞMA TÜRÜ" FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextSecondary}" />
+                            <Border Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                                    StrokeShape="RoundRectangle 10" Padding="4,0">
+                                <Picker Title="Tümü"
+                                        ItemsSource="{Binding JobTypes}"
+                                        SelectedItem="{Binding TempJobType}"
+                                        TextColor="{StaticResource TextPrimary}"
+                                        TitleColor="{StaticResource TextMuted}" />
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="📁 KATEGORİ" FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextSecondary}" />
+                            <Border Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                                    StrokeShape="RoundRectangle 10" Padding="4,0">
+                                <Picker Title="Tüm Kategoriler"
+                                        ItemsSource="{Binding Categories}"
+                                        ItemDisplayBinding="{Binding Name}"
+                                        SelectedItem="{Binding TempCategory}"
+                                        TextColor="{StaticResource TextPrimary}"
+                                        TitleColor="{StaticResource TextMuted}" />
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <Grid ColumnDefinitions="*,2*" ColumnSpacing="10" Margin="0,8,0,0">
+                            <Border Grid.Column="0"
+                                    BackgroundColor="{StaticResource Surface}"
+                                    Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                                    StrokeShape="RoundRectangle 12" Padding="0,14">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ClearFilterCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Temizle" HorizontalOptions="Center"
+                                       FontAttributes="Bold" FontSize="14"
+                                       TextColor="{StaticResource TextPrimary}" />
+                            </Border>
+                            <Border Grid.Column="1"
+                                    BackgroundColor="{StaticResource Primary}"
+                                    Stroke="Transparent"
+                                    StrokeShape="RoundRectangle 12" Padding="0,14">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ApplyFilterCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Uygula" HorizontalOptions="Center"
+                                       FontAttributes="Bold" FontSize="14"
+                                       TextColor="White" />
+                            </Border>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Border>
+        </Grid>
+
+    </Grid>
+</ContentPage>

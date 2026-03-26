@@ -35,7 +35,7 @@ public class ScraperOrchestrator
 
             foreach (var dto in jobs)
             {
-                var hash = _hashService.Compute(dto.Title, dto.CompanyName, dto.City);
+                var hash = _hashService.Compute(dto.Title ?? "", dto.CompanyName ?? "", dto.City ?? "");
 
                 if (processedHashes.Contains(hash)) continue;
                 processedHashes.Add(hash);
@@ -45,7 +45,7 @@ public class ScraperOrchestrator
                 var company = await _db.Companies.FirstOrDefaultAsync(c => c.Name == dto.CompanyName);
                 if (company == null)
                 {
-                    company = new Company { Name = dto.CompanyName, LogoUrl = dto.CompanyLogoUrl };
+                    company = new Company { Name = dto.CompanyName ?? "", LogoUrl = dto.CompanyLogoUrl };
                     _db.Companies.Add(company);
                     await _db.SaveChangesAsync();
                 }
@@ -55,16 +55,16 @@ public class ScraperOrchestrator
                     await _db.SaveChangesAsync();
                 }
 
-                var categoryName = CategoryClassifier.Classify(dto.Title);
+                var categoryName = CategoryClassifier.Classify(dto.Title ?? "");
                 var category = await _db.Categories.FirstOrDefaultAsync(c => c.Name == categoryName)
                                ?? await _db.Categories.FirstAsync(c => c.Name == "Diğer");
 
                 _db.Jobs.Add(new Job
                 {
-                    Title = dto.Title?.Length > 300 ? dto.Title[..300] : dto.Title,
+                    Title = (dto.Title?.Length > 300 ? dto.Title[..300] : dto.Title) ?? "",
                     Description = dto.Description,
-                    City = dto.City?.Length > 100 ? dto.City[..100] : dto.City,
-                    JobType = dto.JobType?.Length > 50 ? dto.JobType[..50] : dto.JobType,
+                    City = (dto.City?.Length > 100 ? dto.City[..100] : dto.City) ?? "Belirtilmemiş",
+                    JobType = (dto.JobType?.Length > 50 ? dto.JobType[..50] : dto.JobType) ?? "Tam Zamanlı",
                     OriginalUrl = dto.OriginalUrl,
                     Hash = hash,
                     PublishedAt = dto.PublishedAt,

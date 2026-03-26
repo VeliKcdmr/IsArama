@@ -1,10 +1,12 @@
-﻿namespace IsArama.Mobile
+﻿using IsArama.Mobile.Pages;
+
+namespace IsArama.Mobile;
+
+public partial class AppShell : Shell
 {
-    public partial class AppShell : Shell
+    public AppShell()
     {
-        public AppShell()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+        Routing.RegisterRoute(nameof(JobDetailPage), typeof(JobDetailPage));
     }
 }
