@@ -17,7 +17,7 @@ public class SecretcvComScraper : IScraper
 
         try
         {
-            for (int page = 1; page <= 15; page++)
+            for (int page = 1; page <= 25; page++)
             {
                 var url = page == 1
                     ? "https://www.secretcv.com/is-ilanlari"
@@ -81,6 +81,29 @@ public class SecretcvComScraper : IScraper
         }
 
         return jobs;
+    }
+
+    public async Task<string?> FetchDescriptionAsync(string url)
+    {
+        using var http = new HttpClient();
+        http.Timeout = TimeSpan.FromSeconds(15);
+        http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
+        try
+        {
+            var html = await http.GetStringAsync(url);
+            var doc  = new HtmlDocument();
+            doc.LoadHtml(html);
+            return DescriptionFetcher.TryXPaths(doc,
+                "//div[contains(@class,'job-detail-description')]",
+                "//div[contains(@class,'detail-description')]",
+                "//div[contains(@class,'cv-job-description')]",
+                "//div[contains(@class,'job-description')]",
+                "//div[contains(@class,'description-content')]",
+                "//section[contains(@class,'description')]",
+                "//div[@id='jobDescription']",
+                "//div[contains(@class,'detail-content')]");
+        }
+        catch { return null; }
     }
 
     private static DateTime ParseDate(string text)

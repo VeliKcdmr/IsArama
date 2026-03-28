@@ -1,5 +1,6 @@
 using Hangfire;
 using Hangfire.SqlServer;
+using IsArama.Api.Services;
 using IsArama.Data.Context;
 using IsArama.Scraper.Interfaces;
 using IsArama.Scraper.Scrapers;
@@ -26,6 +27,7 @@ builder.Services.AddScoped<IScraper, LinkedInTrScraper>();
 builder.Services.AddScoped<IScraper, IsbulNetScraper>();
 builder.Services.AddScoped<HashService>();
 builder.Services.AddScoped<ScraperOrchestrator>();
+builder.Services.AddScoped<JobDetailFetcher>();
 
 // Hangfire
 builder.Services.AddHangfire(config => config

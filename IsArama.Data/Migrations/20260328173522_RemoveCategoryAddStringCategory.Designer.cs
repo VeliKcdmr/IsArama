@@ -4,6 +4,7 @@ using IsArama.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IsArama.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260328173522_RemoveCategoryAddStringCategory")]
+    partial class RemoveCategoryAddStringCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,6 +55,10 @@ namespace IsArama.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -161,10 +168,45 @@ namespace IsArama.Data.Migrations
                         },
                         new
                         {
+                            Id = 5,
+                            BaseUrl = "https://www.iskur.gov.tr",
+                            IsActive = true,
+                            Name = "İŞKUR"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            BaseUrl = "https://www.sahibinden.com",
+                            IsActive = true,
+                            Name = "Sahibinden.com"
+                        },
+                        new
+                        {
                             Id = 7,
                             BaseUrl = "https://ilan.memurlar.net",
                             IsActive = true,
                             Name = "Memurlar.net"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            BaseUrl = "https://tr.indeed.com",
+                            IsActive = true,
+                            Name = "Indeed TR"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            BaseUrl = "https://www.adzuna.com.tr",
+                            IsActive = true,
+                            Name = "Adzuna TR"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            BaseUrl = "https://jooble.org/tr",
+                            IsActive = true,
+                            Name = "Jooble TR"
                         },
                         new
                         {

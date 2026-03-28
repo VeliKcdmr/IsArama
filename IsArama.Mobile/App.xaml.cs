@@ -8,8 +8,13 @@ public partial class App : Application
     {
         InitializeComponent();
         _shell = shell;
+
+        MainPage = new Pages.SplashPage(() =>
+        {
+            MainPage = _shell;
+        });
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
-        => new Window(_shell);
+        => new Window(MainPage!);
 }

@@ -2,7 +2,7 @@ using HtmlAgilityPack;
 using IsArama.Data.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace IsArama.Web.Services;
+namespace IsArama.Api.Services;
 
 public class JobDetailFetcher
 {
@@ -73,12 +73,10 @@ public class JobDetailFetcher
 
     private static HtmlNode? GetIsbulNode(HtmlNode root)
     {
-        // İçerik SSR HTML'de ul.list-node + p.text-node olarak geliyor
         var container = root.SelectSingleNode(
             "//div[contains(@class,'overflow-hidden') and contains(@class,'break-words')]");
         if (container != null) return container;
 
-        // Fallback: JSON-LD description alanından metin olarak al
         var scripts = root.SelectNodes("//script[@type='application/ld+json']");
         if (scripts == null) return null;
         foreach (var script in scripts)
@@ -103,14 +101,11 @@ public class JobDetailFetcher
         if (nodes == null || nodes.Count < 2) return null;
         var node = nodes[1];
 
-        // Yalnızca içerik elementlerini tut (span başlıklar + p/ul/li/strong)
-        // div'ler = aksiyonlar (İşe Başvur, veya, Cv Oluştur, İlanı Şikayet Et) — hepsini kaldır
         var divs = node.SelectNodes(".//div");
         if (divs != null)
             foreach (var d in divs.ToList())
                 d.Remove();
 
-        // Yinelenen H2 başlığı kaldır (şirket adı - zaten modalda gösteriliyor)
         var h2 = node.SelectNodes(".//h2[contains(@class,'cj-title')]");
         if (h2 != null)
             foreach (var h in h2.ToList())
@@ -122,53 +117,41 @@ public class JobDetailFetcher
     private static HtmlNode? GetMemurlarNode(HtmlNode root)
     {
         const string baseUrl = "https://ilan.memurlar.net";
-        var sb = new System.Text.StringBuilder();
 
-        // Metin içerik (div.detail) — eski ilanlar metin, yeni ilanlar resim içerebilir
-        var detail = root.SelectSingleNode("//article//div[contains(@class,'detail')]");
-        if (detail != null)
+        var unwanted = new[]
         {
-            // Script ve iframe'leri temizle
-            var toRemove = detail.SelectNodes(".//script | .//iframe | .//ins");
-            if (toRemove != null)
-                foreach (var n in toRemove.ToList())
+        "//div[contains(@class,'breadcrumb')]",
+        "//div[contains(@class,'social')]",
+        "//a[contains(@class,'print')]",
+        "//a[contains(text(),'Yazdır')]",
+        "//div[contains(@class,'comment')]",
+        "//div[contains(@class,'yorum')]",
+        "//div[contains(@class,'abone')]",
+        "//div[contains(@class,'font-size')]",
+    };
+
+        foreach (var xpath in unwanted)
+        {
+            var nodes = root.SelectNodes(xpath);
+            if (nodes != null)
+                foreach (var n in nodes.ToList())
                     n.Remove();
-
-            // İçerideki görsellerin URL'lerini mutlak adrese çevir
-            var detailImgs = detail.SelectNodes(".//img[@src]");
-            if (detailImgs != null)
-                foreach (var img in detailImgs)
-                {
-                    var src = img.GetAttributeValue("src", "");
-                    src = AbsoluteUrl(src, baseUrl);
-                    img.SetAttributeValue("src", src);
-                    img.SetAttributeValue("style", "max-width:100%;display:block;margin:8px 0;border-radius:6px;");
-                    // Diğer attribute'ları temizle
-                    foreach (var a in img.Attributes.Where(x => x.Name != "src" && x.Name != "alt" && x.Name != "style").Select(x => x.Name).ToList())
-                        img.Attributes.Remove(a);
-                }
-
-            StripAttributes(detail);
-            sb.Append(detail.InnerHtml.Trim());
         }
 
-        // Doküman görselleri (taranan belge olarak gelen ilanlar)
-        var docImgs = root.SelectNodes("//article//img[@src]");
-        if (docImgs != null)
-        {
-            foreach (var img in docImgs)
+        var node = root.SelectSingleNode("//div[contains(@class,'content-detail panel')]");
+        if (node == null) return null;
+
+        var imgs = node.SelectNodes(".//img[@src]");
+        if (imgs != null)
+            foreach (var img in imgs)
             {
-                var src = img.GetAttributeValue("src", "");
-                if (!src.Contains("/common/job/advert/documents/")) continue;
-                src = AbsoluteUrl(src, baseUrl);
-                var alt = img.GetAttributeValue("alt", "");
-                sb.Append($"<img src=\"{src}\" alt=\"{alt}\" style=\"max-width:100%;display:block;margin-top:12px;border-radius:8px;\"/>");
+                var src = AbsoluteUrl(img.GetAttributeValue("src", ""), baseUrl);
+                img.SetAttributeValue("src", src);
             }
-        }
 
-        if (sb.Length == 0) return null;
-        return HtmlNode.CreateNode($"<div>{sb}</div>");
+        return node;
     }
+
 
     private static string AbsoluteUrl(string src, string baseUrl)
     {
@@ -179,7 +162,7 @@ public class JobDetailFetcher
 
     private static string CleanHtml(HtmlNode node, string baseUrl = "")
     {
-        var removeTags = new[] { "script", "style", "nav", "form", "button", "input", "select", "textarea", "header", "footer", "aside" };
+        var removeTags = new[] { "script", "style", "nav", "form", "button", "input", "select", "textarea", "header", "footer", "aside", "iframe" };
         foreach (var tag in removeTags)
         {
             var nodes = node.SelectNodes($".//{tag}");
@@ -198,7 +181,6 @@ public class JobDetailFetcher
                 var dataSrc = img.GetAttributeValue("data-src", "");
                 var lazySrc = img.GetAttributeValue("data-lazy-src", "");
 
-                // En dolu kaynağı seç
                 var best = !string.IsNullOrWhiteSpace(dataSrc) ? dataSrc
                          : !string.IsNullOrWhiteSpace(lazySrc)  ? lazySrc
                          : src;
@@ -219,7 +201,7 @@ public class JobDetailFetcher
 
     private static void StripAttributes(HtmlNode node)
     {
-        if (node.NodeType == HtmlNodeType.Element && node.Name != "img") // img zaten yukarıda işlendi
+        if (node.NodeType == HtmlNodeType.Element && node.Name != "img")
         {
             var toRemove = node.Attributes.Select(a => a.Name).ToList();
             foreach (var a in toRemove) node.Attributes.Remove(a);

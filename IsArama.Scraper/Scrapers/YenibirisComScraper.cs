@@ -17,7 +17,7 @@ public class YenibirisComScraper : IScraper
 
         try
         {
-            for (int page = 1; page <= 8; page++)
+            for (int page = 1; page <= 25; page++)
             {
                 var url = $"https://www.yenibiris.com/is-ilanlari?page={page}";
                 var doc = await web.LoadFromWebAsync(url);
@@ -93,6 +93,29 @@ public class YenibirisComScraper : IScraper
         }
 
         return jobs;
+    }
+
+    public async Task<string?> FetchDescriptionAsync(string url)
+    {
+        using var http = new HttpClient();
+        http.Timeout = TimeSpan.FromSeconds(15);
+        http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
+        try
+        {
+            var html = await http.GetStringAsync(url);
+            var doc  = new HtmlDocument();
+            doc.LoadHtml(html);
+            return DescriptionFetcher.TryXPaths(doc,
+                "//div[contains(@class,'jobDescriptionArea')]",
+                "//div[contains(@class,'job-description')]",
+                "//div[contains(@class,'desc-content')]",
+                "//div[contains(@class,'ad-description')]",
+                "//div[@id='jobDescription']",
+                "//div[@id='job-description']",
+                "//section[contains(@class,'description')]",
+                "//div[contains(@class,'ilan-icerik')]");
+        }
+        catch { return null; }
     }
 
     private static string NormalizeJobType(string raw)

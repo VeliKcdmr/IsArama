@@ -1,4 +1,4 @@
-﻿using IsArama.Data.Context;
+using IsArama.Data.Context;
 using IsArama.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,24 +17,23 @@ public class JobsController : Controller
     }
 
     public async Task<IActionResult> Index(
-        string? q, string? city, int? categoryId, string? jobType, int? sourceId, int page = 1)
+        string? q, string? city, string? position, string? jobType, int? sourceId, int page = 1)
     {
         const int pageSize = 20;
 
         var query = _db.Jobs
             .Include(j => j.Company)
-            .Include(j => j.Category)
             .Include(j => j.Source)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(q))
             query = query.Where(j => j.Title.Contains(q) || j.Company.Name.Contains(q));
 
+        if (!string.IsNullOrWhiteSpace(position))
+            query = query.Where(j => j.Title.Contains(position));
+
         if (!string.IsNullOrWhiteSpace(city))
             query = query.Where(j => j.City == city);
-
-        if (categoryId.HasValue)
-            query = query.Where(j => j.CategoryId == categoryId);
 
         if (!string.IsNullOrWhiteSpace(jobType))
             query = query.Where(j => j.JobType == jobType);
@@ -51,14 +50,13 @@ public class JobsController : Controller
 
         ViewBag.Q          = q;
         ViewBag.City       = city;
-        ViewBag.CategoryId = categoryId;
+        ViewBag.Position   = position;
         ViewBag.JobType    = jobType;
         ViewBag.SourceId   = sourceId;
         ViewBag.Page       = page;
         ViewBag.PageSize   = pageSize;
         ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
         ViewBag.Total      = total;
-        ViewBag.Categories   = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
         ViewBag.Cities       = await _db.Jobs.Select(j => j.City).Distinct().OrderBy(c => c).ToListAsync();
         ViewBag.Sources      = await _db.Sources.Where(s => s.IsActive).OrderBy(s => s.Name).ToListAsync();
         ViewBag.SourceCounts = await _db.Jobs
@@ -74,7 +72,6 @@ public class JobsController : Controller
     {
         var job = await _db.Jobs
             .Include(j => j.Company)
-            .Include(j => j.Category)
             .Include(j => j.Source)
             .FirstOrDefaultAsync(j => j.Id == id);
 

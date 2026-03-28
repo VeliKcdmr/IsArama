@@ -55,19 +55,17 @@
                     </Border>
                 </VerticalStackLayout>
 
-                <!-- Kategori -->
+                <!-- Pozisyon -->
                 <VerticalStackLayout Spacing="6">
-                    <Label Text="📁 KATEGORİ" FontSize="11" FontAttributes="Bold"
+                    <Label Text="💼 POZİSYON" FontSize="11" FontAttributes="Bold"
                            TextColor="{StaticResource TextSecondary}" />
                     <Border Stroke="{StaticResource Border}" StrokeThickness="1.5"
-                            StrokeShape="RoundRectangle 10" Padding="4,0"
+                            StrokeShape="RoundRectangle 10" Padding="12,0"
                             BackgroundColor="{StaticResource Surface}">
-                        <Picker Title="Tüm Kategoriler"
-                                ItemsSource="{Binding Categories}"
-                                ItemDisplayBinding="{Binding Name}"
-                                SelectedItem="{Binding TempCategory}"
-                                TextColor="{StaticResource TextPrimary}"
-                                TitleColor="{StaticResource TextMuted}" />
+                        <Entry Placeholder="Pozisyon ara..."
+                               Text="{Binding TempPosition}"
+                               TextColor="{StaticResource TextPrimary}"
+                               PlaceholderColor="{StaticResource TextMuted}" />
                     </Border>
                 </VerticalStackLayout>
 

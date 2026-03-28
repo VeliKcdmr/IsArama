@@ -1,5 +1,5 @@
-﻿using IsArama.Data.Context;
-using IsArama.Data.Entities;
+using IsArama.Api.Services;
+using IsArama.Data.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,14 +10,19 @@ namespace IsArama.Api.Controllers;
 public class JobsController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
+    private readonly JobDetailFetcher _fetcher;
 
-    public JobsController(ApplicationDbContext db) => _db = db;
+    public JobsController(ApplicationDbContext db, JobDetailFetcher fetcher)
+    {
+        _db = db;
+        _fetcher = fetcher;
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetJobs(
         [FromQuery] string? q,
         [FromQuery] string? city,
-        [FromQuery] int? categoryId,
+        [FromQuery] string? position,
         [FromQuery] string? jobType,
         [FromQuery] string? source,
         [FromQuery] int page = 1,
@@ -25,18 +30,17 @@ public class JobsController : ControllerBase
     {
         var query = _db.Jobs
             .Include(j => j.Company)
-            .Include(j => j.Category)
             .Include(j => j.Source)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(q))
             query = query.Where(j => j.Title.Contains(q) || j.Company.Name.Contains(q));
 
+        if (!string.IsNullOrWhiteSpace(position))
+            query = query.Where(j => j.Title.Contains(position));
+
         if (!string.IsNullOrWhiteSpace(city))
             query = query.Where(j => j.City == city);
-
-        if (categoryId.HasValue)
-            query = query.Where(j => j.CategoryId == categoryId);
 
         if (!string.IsNullOrWhiteSpace(jobType))
             query = query.Where(j => j.JobType == jobType);
@@ -59,7 +63,6 @@ public class JobsController : ControllerBase
                 j.PublishedAt,
                 Company = j.Company.Name,
                 CompanyLogo = j.Company.LogoUrl,
-                Category = j.Category.Name,
                 Source = j.Source.Name
             })
             .ToListAsync();
@@ -72,7 +75,6 @@ public class JobsController : ControllerBase
     {
         var job = await _db.Jobs
             .Include(j => j.Company)
-            .Include(j => j.Category)
             .Include(j => j.Source)
             .Where(j => j.Id == id)
             .Select(j => new
@@ -86,13 +88,36 @@ public class JobsController : ControllerBase
                 j.PublishedAt,
                 Company = j.Company.Name,
                 CompanyLogo = j.Company.LogoUrl,
-                Category = j.Category.Name,
                 Source = j.Source.Name,
                 SourceUrl = j.Source.BaseUrl
             })
             .FirstOrDefaultAsync();
 
         if (job == null) return NotFound();
-        return Ok(job);
+
+        // Description yoksa orijinal siteden çek ve DB'ye kaydet
+        if (string.IsNullOrWhiteSpace(job.Description))
+            await _fetcher.GetOrFetchAsync(id);
+
+        // Güncel description DB'den oku (fetcher kaydettiyse artık dolu)
+        var freshDesc = await _db.Jobs
+            .Where(j => j.Id == id)
+            .Select(j => j.Description)
+            .FirstOrDefaultAsync();
+
+        return Ok(new
+        {
+            job.Id,
+            job.Title,
+            Description = freshDesc,
+            job.City,
+            job.JobType,
+            job.OriginalUrl,
+            job.PublishedAt,
+            Company     = job.Company,
+            CompanyLogo = job.CompanyLogo,
+            Source      = job.Source,
+            SourceUrl   = job.SourceUrl
+        });
     }
 }

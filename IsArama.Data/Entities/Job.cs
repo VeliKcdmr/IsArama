@@ -1,4 +1,4 @@
-﻿namespace IsArama.Data.Entities;
+namespace IsArama.Data.Entities;
 
 public class Job
 {
@@ -14,9 +14,6 @@ public class Job
 
     public int CompanyId { get; set; }
     public Company Company { get; set; } = null!;
-
-    public int CategoryId { get; set; }
-    public Category Category { get; set; } = null!;
 
     public int SourceId { get; set; }
     public Source Source { get; set; } = null!;

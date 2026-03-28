@@ -9,7 +9,7 @@ public class IsbulNetScraper : IScraper
 {
     public string SourceName => "İşbul.net";
     private const string BaseUrl = "https://www.isbul.net/is-ilanlari?page={0}";
-    private const int MaxPages = 20;
+    private const int MaxPages = 25;
 
     public async Task<List<JobDto>> ScrapeAsync()
     {
@@ -89,6 +89,29 @@ public class IsbulNetScraper : IScraper
         }
 
         return jobs;
+    }
+
+    public async Task<string?> FetchDescriptionAsync(string url)
+    {
+        using var http = new HttpClient();
+        http.Timeout = TimeSpan.FromSeconds(15);
+        http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+        try
+        {
+            var html = await http.GetStringAsync(url);
+            var doc  = new HtmlDocument();
+            doc.LoadHtml(html);
+            return DescriptionFetcher.TryXPaths(doc,
+                "//div[contains(@class,'job-detail__description')]",
+                "//div[contains(@class,'detail-job__desc')]",
+                "//div[contains(@class,'job-description')]",
+                "//div[contains(@class,'detail-content')]",
+                "//section[contains(@class,'job-detail')]",
+                "//div[@id='jobDesc']",
+                "//div[@id='job-detail-content']",
+                "//div[contains(@class,'ilan-detay')]");
+        }
+        catch { return null; }
     }
 
     private static string NormalizeJobType(string raw)

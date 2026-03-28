@@ -11,7 +11,6 @@ public class JobDetail
     public DateTime PublishedAt { get; set; }
     public string Company { get; set; } = "";
     public string? CompanyLogo { get; set; }
-    public string Category { get; set; } = "";
     public string Source { get; set; } = "";
     public string SourceUrl { get; set; } = "";
 

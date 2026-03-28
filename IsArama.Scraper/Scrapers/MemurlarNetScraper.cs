@@ -28,7 +28,7 @@ public class MemurlarNetScraper : IScraper
         {
             foreach (var (slug, jobType) in Categories)
             {
-                for (int page = 1; page <= 5; page++)
+                for (int page = 1; page <= 25; page++)
                 {
                     var url = page == 1
                         ? $"https://ilan.memurlar.net/kategori/{slug}/"
@@ -54,19 +54,19 @@ public class MemurlarNetScraper : IScraper
                                           ?.InnerText?.Trim() ?? "";
 
                         // City: extract first word of title (typically the province name)
-                        var city = CityNormalizer.Normalize(ExtractCity(title));
+                        var city = CityNormalizer.Normalize(title);
 
                         jobs.Add(new JobDto
                         {
-                            Title          = title,
-                            CompanyName    = title,   // title contains org name; no separate field
+                            Title = "İşçi Alımı",
+                            CompanyName = title,
                             CompanyLogoUrl = "",
-                            City           = city,
-                            JobType        = jobType,
-                            OriginalUrl    = link.StartsWith("http") ? link
-                                           : link.StartsWith("//")   ? "https:" + link
+                            City = city,
+                            JobType = jobType,
+                            OriginalUrl = link.StartsWith("http") ? link
+                                           : link.StartsWith("//") ? "https:" + link
                                            : $"https://ilan.memurlar.net{link}",
-                            PublishedAt    = ParseDate(dateText)
+                            PublishedAt = ParseDate(dateText)
                         });
                     }
 
@@ -82,14 +82,43 @@ public class MemurlarNetScraper : IScraper
         return jobs;
     }
 
-    private static string ExtractCity(string title)
+    public async Task<string?> FetchDescriptionAsync(string url)
     {
-        if (string.IsNullOrWhiteSpace(title)) return "Belirtilmemiş";
-        // Title format is usually "CityName District/OrgName X workers ..."
-        // First word is typically the province
-        var firstSpace = title.IndexOf(' ');
-        var city = firstSpace > 0 ? title[..firstSpace].Trim() : title.Trim();
-        return string.IsNullOrWhiteSpace(city) ? "Belirtilmemiş" : city;
+        using var http = new HttpClient();
+        http.Timeout = TimeSpan.FromSeconds(15);
+        http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
+        try
+        {
+            var html = await http.GetStringAsync(url);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+            // Gereksiz bölümleri temizle
+            var unwanted = new[]
+            {
+             "//div[contains(@class,'breadcrumb')]",      // Ana sayfa > Geçici İşçi İlanları
+             "//div[contains(@class,'social')]",           // Yorumlar / Abone Ol
+             "//a[contains(@class,'print')]",              // Yazdır
+             "//a[contains(text(),'Yazdır')]",             // Yazdır (text bazlı)
+             "//div[contains(@class,'comment')]",          // Yorum bölümü
+             "//div[contains(@class,'yorum')]",
+             "//div[contains(@class,'abone')]",
+             "//div[contains(@class,'font-size')]",        // Font boyutu butonları (- T T +)
+             "//iframe",
+            };
+
+            foreach (var xpath in unwanted)
+            {
+                var nodes = doc.DocumentNode.SelectNodes(xpath);
+                if (nodes != null)
+                    foreach (var node in nodes.ToList())
+                        node.Remove();
+            }
+
+            return DescriptionFetcher.TryXPaths(doc, url,
+                "//div[contains(@class,'content-detail panel')]"
+                );
+        }
+        catch { return null; }
     }
 
     private static DateTime ParseDate(string text)
@@ -99,10 +128,18 @@ public class MemurlarNetScraper : IScraper
 
         var months = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
         {
-            ["Ocak"]    = 1,  ["Şubat"]  = 2,  ["Mart"]    = 3,
-            ["Nisan"]   = 4,  ["Mayıs"]  = 5,  ["Haziran"] = 6,
-            ["Temmuz"]  = 7,  ["Ağustos"] = 8, ["Eylül"]   = 9,
-            ["Ekim"]    = 10, ["Kasım"]  = 11, ["Aralık"]  = 12,
+            ["Ocak"] = 1,
+            ["Şubat"] = 2,
+            ["Mart"] = 3,
+            ["Nisan"] = 4,
+            ["Mayıs"] = 5,
+            ["Haziran"] = 6,
+            ["Temmuz"] = 7,
+            ["Ağustos"] = 8,
+            ["Eylül"] = 9,
+            ["Ekim"] = 10,
+            ["Kasım"] = 11,
+            ["Aralık"] = 12,
         };
 
         var parts = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);

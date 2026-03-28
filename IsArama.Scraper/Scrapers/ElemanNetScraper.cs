@@ -17,7 +17,7 @@ public class ElemanNetScraper : IScraper
 
         try
         {
-            for (int page = 1; page <= 15; page++)
+            for (int page = 1; page <= 25; page++)
             {
                 var url = $"https://www.eleman.net/is-ilanlari?page={page}";
                 var doc = await web.LoadFromWebAsync(url);
@@ -96,6 +96,29 @@ public class ElemanNetScraper : IScraper
         }
 
         return jobs;
+    }
+
+    public async Task<string?> FetchDescriptionAsync(string url)
+    {
+        using var http = new HttpClient();
+        http.Timeout = TimeSpan.FromSeconds(15);
+        http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36");
+        try
+        {
+            var html = await http.GetStringAsync(url);
+            var doc  = new HtmlDocument();
+            doc.LoadHtml(html);
+            return DescriptionFetcher.TryXPaths(doc,
+                "//div[contains(@class,'c-job-description__content')]",
+                "//div[contains(@class,'job-description-content')]",
+                "//div[contains(@class,'job-description')]",
+                "//section[contains(@class,'job-description')]",
+                "//div[@id='jobDescription']",
+                "//div[@id='job-description']",
+                "//div[contains(@class,'description-content')]",
+                "//article[contains(@class,'job-detail')]");
+        }
+        catch { return null; }
     }
 
     private static string NormalizeJobType(string raw)

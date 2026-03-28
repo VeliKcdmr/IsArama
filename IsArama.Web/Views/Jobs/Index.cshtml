@@ -3,11 +3,11 @@
     ViewData["Title"] = "İş İlanları";
     int currentPage  = ViewBag.Page;
     int totalPages   = ViewBag.TotalPages;
-    string? qVal      = ViewBag.Q as string;
-    string? cityVal   = ViewBag.City as string;
-    int?    catVal    = ViewBag.CategoryId as int?;
-    string? typeVal   = ViewBag.JobType as string;
-    int?    sourceVal = ViewBag.SourceId as int?;
+    string? qVal       = ViewBag.Q as string;
+    string? cityVal    = ViewBag.City as string;
+    string? posVal     = ViewBag.Position as string;
+    string? typeVal    = ViewBag.JobType as string;
+    int?    sourceVal  = ViewBag.SourceId as int?;
 }
 
 <div class="container-fluid py-4">
@@ -38,16 +38,11 @@
                             </select>
                         </div>
 
-                        <!-- Kategori -->
+                        <!-- Pozisyon -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold small">Kategori</label>
-                            <select name="categoryId" class="form-select">
-                                <option value="">Tüm Kategoriler</option>
-                                @foreach (var cat in ViewBag.Categories)
-                                {
-                                    <option value="@cat.Id" selected="@(catVal == (int)cat.Id)">@cat.Name</option>
-                                }
-                            </select>
+                            <label class="form-label fw-semibold small">Pozisyon</label>
+                            <input type="text" name="position" value="@posVal"
+                                   class="form-control" placeholder="Pozisyon ara..." />
                         </div>
 
                         <!-- İş Tipi -->
@@ -98,7 +93,7 @@
                 var baseParams = new System.Collections.Generic.List<string>();
                 if (!string.IsNullOrWhiteSpace(qVal))   baseParams.Add($"q={Uri.EscapeDataString(qVal)}");
                 if (!string.IsNullOrWhiteSpace(cityVal)) baseParams.Add($"city={Uri.EscapeDataString(cityVal)}");
-                if (catVal.HasValue)                     baseParams.Add($"categoryId={catVal}");
+                if (!string.IsNullOrWhiteSpace(posVal))  baseParams.Add($"position={Uri.EscapeDataString(posVal)}");
                 if (!string.IsNullOrWhiteSpace(typeVal)) baseParams.Add($"jobType={Uri.EscapeDataString(typeVal)}");
                 var baseQuery = string.Join("&", baseParams);
                 var allUrl    = string.IsNullOrEmpty(baseQuery) ? "/Jobs" : $"/Jobs?{baseQuery}";
@@ -184,12 +179,6 @@
                                         <span class="badge rounded-pill bg-light text-secondary border" style="font-size:0.78em;font-weight:500;">
                                             <i class="bi bi-geo-alt me-1"></i>@job.City
                                         </span>
-                                        @if (job.Category.Name != "Diğer")
-                                        {
-                                            <span class="badge rounded-pill bg-light text-secondary border" style="font-size:0.78em;font-weight:500;">
-                                                <i class="bi bi-tag me-1"></i>@job.Category.Name
-                                            </span>
-                                        }
                                         <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size:0.78em;font-weight:500;">
                                             @job.JobType
                                         </span>

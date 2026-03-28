@@ -9,7 +9,7 @@ public class LinkedInTrScraper : IScraper
 {
     public string SourceName => "LinkedIn TR";
     private const string BaseUrl = "https://www.linkedin.com/jobs/search/?location=T%C3%BCrkiye&start={0}";
-    private const int MaxPages = 10; // 25 x 10 = 250 ilan
+    private const int MaxPages = 25; // 25 x 10 = 250 ilan
 
     public async Task<List<JobDto>> ScrapeAsync()
     {
@@ -37,7 +37,9 @@ public class LinkedInTrScraper : IScraper
                     var company = card.SelectSingleNode(".//h4");
                     var meta    = card.SelectSingleNode(".//span[contains(@class,'job-search-card__location')]")
                                ?? card.SelectSingleNode(".//span[@class]");
-                    var logoImg = card.SelectSingleNode(".//img[@data-delayed-url]");
+                    var logoImg = card.SelectSingleNode(".//img[contains(@class,'EntityPhoto')]")
+                              ?? card.SelectSingleNode(".//img[@src and contains(@src,'media.licdn.com')]")
+                              ?? card.SelectSingleNode(".//img[@data-delayed-url]");
 
                     if (title == null || link == null) continue;
 
@@ -45,7 +47,10 @@ public class LinkedInTrScraper : IScraper
                     var companyText = company != null ? HtmlEntity.DeEntitize(company.InnerText.Trim()) : "Belirtilmemiş";
                     var href        = link.GetAttributeValue("href", "");
                     if (!href.StartsWith("http")) href = "https://www.linkedin.com" + href;
-                    var logoUrl = logoImg?.GetAttributeValue("data-delayed-url", "") ?? "";
+                    var logoUrl = HtmlEntity.DeEntitize(
+                        logoImg?.GetAttributeValue("src", "")
+                        ?? logoImg?.GetAttributeValue("data-delayed-url", "")
+                        ?? "");
 
                     // Location genellikle "İstanbul, Türkiye" formatında
                     var locationText = meta?.InnerText.Trim() ?? "";
@@ -77,6 +82,9 @@ public class LinkedInTrScraper : IScraper
 
         return jobs;
     }
+
+    public Task<string?> FetchDescriptionAsync(string url)
+        => Task.FromResult<string?>(null); // LinkedIn auth gerektiriyor
 
 
     private static DateTime ParseRelativeDate(string text)

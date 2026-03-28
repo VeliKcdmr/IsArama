@@ -52,24 +52,22 @@ public partial class JobsViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasActiveFilters))]
-    private int? _selectedCategoryId;
-
-    [ObservableProperty] private string? _selectedCategoryName;
+    [NotifyPropertyChangedFor(nameof(ActiveFilterSummary))]
+    private string? _selectedPosition;
 
     // Geçici filtre değerleri (sheet açıkken düzenleniyor)
     [ObservableProperty] private string? _tempCity;
     [ObservableProperty] private string? _tempJobType;
-    [ObservableProperty] private CategoryInfo? _tempCategory;
+    [ObservableProperty] private string? _tempPosition;
 
     public ObservableCollection<JobListItem> Jobs { get; } = [];
     public ObservableCollection<SourceInfo> Sources { get; } = [];
     public ObservableCollection<string> Cities { get; } = [];
-    public ObservableCollection<CategoryInfo> Categories { get; } = [];
     public ObservableCollection<string> JobTypes { get; } =
         ["Tam Zamanlı", "Sözleşmeli", "Memur", "Staj", "Yarı Zamanlı"];
 
     public bool HasActiveFilters =>
-        SelectedCity != null || SelectedJobType != null || SelectedCategoryId != null;
+        SelectedCity != null || SelectedJobType != null || SelectedPosition != null;
 
     public string ResultCountText =>
         TotalResults > 0 ? $"{TotalResults:N0} ilan bulundu" : "Sonuç bulunamadı";
@@ -79,9 +77,9 @@ public partial class JobsViewModel : ObservableObject
         get
         {
             var parts = new List<string>();
-            if (SelectedCity != null)        parts.Add($"📍 {SelectedCity}");
-            if (SelectedJobType != null)     parts.Add($"⏱ {SelectedJobType}");
-            if (SelectedCategoryName != null) parts.Add($"📁 {SelectedCategoryName}");
+            if (SelectedCity != null)     parts.Add($"📍 {SelectedCity}");
+            if (SelectedJobType != null)  parts.Add($"⏱ {SelectedJobType}");
+            if (SelectedPosition != null) parts.Add($"💼 {SelectedPosition}");
             return parts.Count > 0 ? string.Join("  •  ", parts) : "";
         }
     }
@@ -105,18 +103,12 @@ public partial class JobsViewModel : ObservableObject
             s.IsSelected = s.Name == value;
     }
 
-    partial void OnTempCategoryChanged(CategoryInfo? value)
-    {
-        // CategoryInfo değiştiğinde id güncellenir — ApplyFilter'da kullanılır
-    }
-
     [RelayCommand]
     public async Task InitAsync()
     {
-        var sourcesTask    = _api.GetSourcesAsync();
-        var citiesTask     = _api.GetCitiesAsync();
-        var categoriesTask = _api.GetCategoriesAsync();
-        await Task.WhenAll(sourcesTask, citiesTask, categoriesTask);
+        var sourcesTask = _api.GetSourcesAsync();
+        var citiesTask  = _api.GetCitiesAsync();
+        await Task.WhenAll(sourcesTask, citiesTask);
 
         Sources.Clear();
         foreach (var s in sourcesTask.Result)
@@ -125,10 +117,6 @@ public partial class JobsViewModel : ObservableObject
         Cities.Clear();
         foreach (var c in citiesTask.Result.Where(x => x != "Belirtilmemiş").Take(60))
             Cities.Add(c);
-
-        Categories.Clear();
-        foreach (var c in categoriesTask.Result)
-            Categories.Add(c);
 
         await ReloadAsync();
     }
@@ -194,9 +182,7 @@ public partial class JobsViewModel : ObservableObject
     {
         TempCity     = SelectedCity;
         TempJobType  = SelectedJobType;
-        TempCategory = SelectedCategoryId.HasValue
-            ? Categories.FirstOrDefault(c => c.Id == SelectedCategoryId)
-            : null;
+        TempPosition = SelectedPosition;
         IsFilterOpen = true;
     }
 
@@ -206,11 +192,10 @@ public partial class JobsViewModel : ObservableObject
     [RelayCommand]
     public async Task ApplyFilterAsync()
     {
-        SelectedCity         = TempCity;
-        SelectedJobType      = TempJobType;
-        SelectedCategoryId   = TempCategory?.Id;
-        SelectedCategoryName = TempCategory?.Name;
-        IsFilterOpen         = false;
+        SelectedCity     = TempCity;
+        SelectedJobType  = TempJobType;
+        SelectedPosition = TempPosition;
+        IsFilterOpen     = false;
         OnPropertyChanged(nameof(ActiveFilterSummary));
         await ReloadAsync();
         // Filtre sayfasından uygulayınca İlanlar tabına geç
@@ -221,14 +206,13 @@ public partial class JobsViewModel : ObservableObject
     [RelayCommand]
     public async Task ClearFilterAsync()
     {
-        TempCity             = null;
-        TempJobType          = null;
-        TempCategory         = null;
-        SelectedCity         = null;
-        SelectedJobType      = null;
-        SelectedCategoryId   = null;
-        SelectedCategoryName = null;
-        IsFilterOpen         = false;
+        TempCity         = null;
+        TempJobType      = null;
+        TempPosition     = null;
+        SelectedCity     = null;
+        SelectedJobType  = null;
+        SelectedPosition = null;
+        IsFilterOpen     = false;
         OnPropertyChanged(nameof(ActiveFilterSummary));
         await ReloadAsync();
         if (Shell.Current.CurrentPage is not Pages.JobsPage)
@@ -252,12 +236,12 @@ public partial class JobsViewModel : ObservableObject
         if (!append) IsLoading = true;
 
         var result = await _api.GetJobsAsync(
-            q:          SearchQuery,
-            city:       SelectedCity,
-            categoryId: SelectedCategoryId,
-            jobType:    SelectedJobType,
-            source:     SelectedSource,
-            page:       page);
+            q:        SearchQuery,
+            city:     SelectedCity,
+            position: SelectedPosition,
+            jobType:  SelectedJobType,
+            source:   SelectedSource,
+            page:     page);
 
         if (!append) { Jobs.Clear(); IsLoading = false; }
 

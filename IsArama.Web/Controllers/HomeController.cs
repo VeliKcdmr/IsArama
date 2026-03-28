@@ -14,7 +14,6 @@ public class HomeController : Controller
     {
         var recentJobs = await _db.Jobs
             .Include(j => j.Company)
-            .Include(j => j.Category)
             .Include(j => j.Source)
             .OrderByDescending(j => j.PublishedAt)
             .Take(9)

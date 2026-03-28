@@ -16,7 +16,7 @@ public class ApiService
     public async Task<PagedResult?> GetJobsAsync(
         string? q = null,
         string? city = null,
-        int? categoryId = null,
+        string? position = null,
         string? jobType = null,
         string? source = null,
         int page = 1,
@@ -25,11 +25,11 @@ public class ApiService
         bool usePaging = Preferences.Get("UsePagination", true);
         int effectivePageSize = usePaging ? (pageSize > 0 ? pageSize : 20) : 500;
         var url = $"jobs?page={page}&pageSize={effectivePageSize}";
-        if (!string.IsNullOrWhiteSpace(q))          url += $"&q={Uri.EscapeDataString(q)}";
-        if (!string.IsNullOrWhiteSpace(city))       url += $"&city={Uri.EscapeDataString(city)}";
-        if (categoryId.HasValue)                    url += $"&categoryId={categoryId}";
-        if (!string.IsNullOrWhiteSpace(jobType))    url += $"&jobType={Uri.EscapeDataString(jobType)}";
-        if (!string.IsNullOrWhiteSpace(source))     url += $"&source={Uri.EscapeDataString(source)}";
+        if (!string.IsNullOrWhiteSpace(q))        url += $"&q={Uri.EscapeDataString(q)}";
+        if (!string.IsNullOrWhiteSpace(city))     url += $"&city={Uri.EscapeDataString(city)}";
+        if (!string.IsNullOrWhiteSpace(position)) url += $"&position={Uri.EscapeDataString(position)}";
+        if (!string.IsNullOrWhiteSpace(jobType))  url += $"&jobType={Uri.EscapeDataString(jobType)}";
+        if (!string.IsNullOrWhiteSpace(source))   url += $"&source={Uri.EscapeDataString(source)}";
 
         try { return await _http.GetFromJsonAsync<PagedResult>(url, Opts); }
         catch { return null; }
@@ -44,12 +44,6 @@ public class ApiService
     public async Task<List<SourceInfo>> GetSourcesAsync()
     {
         try { return await _http.GetFromJsonAsync<List<SourceInfo>>("sources", Opts) ?? []; }
-        catch { return []; }
-    }
-
-    public async Task<List<CategoryInfo>> GetCategoriesAsync()
-    {
-        try { return await _http.GetFromJsonAsync<List<CategoryInfo>>("categories", Opts) ?? []; }
         catch { return []; }
     }
 

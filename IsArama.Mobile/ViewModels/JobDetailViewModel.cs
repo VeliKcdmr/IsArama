@@ -24,7 +24,7 @@ public partial class JobDetailViewModel : ObservableObject
         if (Job != null)
         {
             HasDescription   = !string.IsNullOrWhiteSpace(Job.Description);
-            DescriptionHtml  = BuildHtml(Job.Description);
+            DescriptionHtml  = BuildHtml(Job.Description, Job.OriginalUrl);
         }
         IsLoading = false;
     }
@@ -39,7 +39,7 @@ public partial class JobDetailViewModel : ObservableObject
     [RelayCommand]
     public async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
 
-    private static string BuildHtml(string? content)
+    private static string BuildHtml(string? content, string? originalUrl=null)
     {
         var body = string.IsNullOrWhiteSpace(content)
             ? "<p style=\"color:#94a3b8;text-align:center;padding:20px;\">Açıklama bulunamadı.<br>Orijinal ilanı ziyaret edin.</p>"
@@ -49,6 +49,7 @@ public partial class JobDetailViewModel : ObservableObject
             <html>
             <head>
               <meta name="viewport" content="width=device-width,initial-scale=1">
+            <base href="{{GetBaseUrl(originalUrl)}}">
               <style>
                 * { box-sizing: border-box; margin: 0; padding: 0; }
                 body { font-family: -apple-system, 'Segoe UI', sans-serif; font-size: 14px; color: #374151; line-height: 1.7; padding: 12px 0; }
@@ -66,4 +67,16 @@ public partial class JobDetailViewModel : ObservableObject
             </html>
             """;
     }
+
+    private static string GetBaseUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return "/";
+        try
+        {
+            var uri = new Uri(url);
+            return $"{uri.Scheme}://{uri.Host}/";
+        }
+        catch { return "/"; }
+    }
+
 }

@@ -120,13 +120,6 @@
                                 Stroke="{StaticResource Border}"
                                 StrokeThickness="1" StrokeShape="RoundRectangle 8"
                                 Padding="8,4" Margin="0,0,6,5">
-                            <Label Text="{Binding Job.Category, StringFormat='📁 {0}'}"
-                                   FontSize="12" TextColor="{StaticResource TextSecondary}" />
-                        </Border>
-                        <Border BackgroundColor="{StaticResource Background}"
-                                Stroke="{StaticResource Border}"
-                                StrokeThickness="1" StrokeShape="RoundRectangle 8"
-                                Padding="8,4" Margin="0,0,6,5">
                             <Label Text="{Binding Job.TimeAgo, StringFormat='🕐 {0}'}"
                                    FontSize="12" TextColor="{StaticResource TextSecondary}" />
                         </Border>

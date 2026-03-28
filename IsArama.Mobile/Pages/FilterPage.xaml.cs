@@ -19,8 +19,6 @@ public partial class FilterPage : ContentPage
         // Temp değerleri aktif filtrelerden doldur
         _vm.TempCity     = _vm.SelectedCity;
         _vm.TempJobType  = _vm.SelectedJobType;
-        _vm.TempCategory = _vm.SelectedCategoryId.HasValue
-            ? _vm.Categories.FirstOrDefault(c => c.Id == _vm.SelectedCategoryId)
-            : null;
+        _vm.TempPosition = _vm.SelectedPosition;
     }
 }

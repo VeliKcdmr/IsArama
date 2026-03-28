@@ -1,5 +1,4 @@
-﻿using IsArama.Data.Context;
-using IsArama.Scraper.Helpers;
+using IsArama.Data.Context;
 using IsArama.Scraper.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,33 +23,6 @@ public class ScraperController : ControllerBase
     {
         await _orchestrator.RunAllAsync();
         return Ok("Scraping tamamlandı.");
-    }
-
-    [HttpPost("reclassify")]
-    public async Task<IActionResult> Reclassify()
-    {
-        var categories = await _db.Categories.ToListAsync();
-        var other = categories.First(c => c.Name == "Diğer");
-        var categoryMap = categories.ToDictionary(c => c.Name, c => c.Id);
-
-        var jobs = await _db.Jobs.ToListAsync();
-        int updated = 0;
-
-        foreach (var job in jobs)
-        {
-            var categoryName = CategoryClassifier.Classify(job.Title ?? "");
-            if (!categoryMap.TryGetValue(categoryName, out var catId))
-                catId = other.Id;
-
-            if (job.CategoryId != catId)
-            {
-                job.CategoryId = catId;
-                updated++;
-            }
-        }
-
-        await _db.SaveChangesAsync();
-        return Ok($"{updated} ilan yeniden sınıflandırıldı.");
     }
 
     [HttpDelete("clear")]

@@ -9,7 +9,6 @@ public class JobListItem
     public DateTime PublishedAt { get; set; }
     public string Company { get; set; } = "";
     public string? CompanyLogo { get; set; }
-    public string Category { get; set; } = "";
     public string Source { get; set; } = "";
 
     public string Initials => Company.Length > 0 ? Company[..1].ToUpperInvariant() : "?";
