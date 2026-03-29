@@ -17,15 +17,19 @@
 
             <!-- Geri butonu -->
             <Border Grid.Column="0"
-                    BackgroundColor="#2d63f0"
-                    Stroke="Transparent"
-                    StrokeShape="RoundRectangle 12"
-                    Padding="14,10"
+                    BackgroundColor="rgba(255,255,255,0.18)"
+                    Stroke="rgba(255,255,255,0.25)"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 20"
+                    Padding="12,7"
                     VerticalOptions="Center">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding GoBackCommand}" />
                 </Border.GestureRecognizers>
-                <Label Text="←" FontSize="24" TextColor="White" />
+                <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                    <Label Text="❮" FontSize="15" TextColor="White" VerticalOptions="Center" LineHeight="1" />
+                    <Label Text="Geri" FontSize="15" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" LineHeight="1" />
+                </HorizontalStackLayout>
             </Border>
 
             <Label Grid.Column="1"
