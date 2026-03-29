@@ -59,6 +59,63 @@ public static class CityNormalizer
         return "Belirtilmemiş";
     }
 
+    // AVM, cadde, vs. gibi lokasyon ipucu olan kelimeler
+    private static readonly HashSet<string> LocationKeywords = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "AVM", "Mağazası", "Caddesi", "Sokak", "Sokağı", "Bulvarı",
+        "Sitesi", "Plaza", "Mahallesi", "Çarşısı", "Yakası", "Tersane"
+    };
+
+    /// <summary>
+    /// "Satış Danışmanı - Erzurum"        → "Satış Danışmanı"
+    /// "Satış Danışmanı (Acıbadem)"        → "Satış Danışmanı"
+    /// "Satış Danışmanı / Cevahir Mağazası"→ "Satış Danışmanı"
+    /// "Satış Danışmanı Akasya AVM"        → "Satış Danışmanı"
+    /// "Satış Danışmanı İstanbul 5. Levent"→ "Satış Danışmanı"
+    /// </summary>
+    public static string StripLocationSuffix(string? title)
+    {
+        if (string.IsNullOrWhiteSpace(title)) return "";
+        var t = title.Trim();
+
+        // 1) " - ..." → at
+        var idx = t.IndexOf(" - ", StringComparison.Ordinal);
+        if (idx > 0) return t[..idx].Trim();
+
+        // 2) " (" → at (parantez içi lokasyon)
+        idx = t.IndexOf(" (", StringComparison.Ordinal);
+        if (idx > 0) return t[..idx].Trim();
+
+        // 3) " / " → at (slash ile lokasyon)
+        idx = t.IndexOf(" / ", StringComparison.Ordinal);
+        if (idx > 0) return t[..idx].Trim();
+
+        // 4) "-Şehir" boşuksuz kalıp
+        idx = t.IndexOf('-');
+        if (idx > 2)
+        {
+            var afterDash = t[(idx + 1)..].TrimStart();
+            foreach (var city in TurkishCities)
+                if (afterDash.StartsWith(city, StringComparison.OrdinalIgnoreCase))
+                    return t[..idx].Trim();
+        }
+
+        // 5) Kelime kelime tara: bilinen şehir veya lokasyon anahtar kelimesi bulununca at
+        var words = t.Split(' ');
+        for (int i = 1; i < words.Length; i++)
+        {
+            var w = words[i];
+            if (LocationKeywords.Contains(w))
+                return string.Join(" ", words[..i]).Trim();
+
+            foreach (var city in TurkishCities)
+                if (string.Equals(w, city, StringComparison.OrdinalIgnoreCase))
+                    return string.Join(" ", words[..i]).Trim();
+        }
+
+        return t;
+    }
+
     // Canonical büyük harf düzeltmesi (set'teki yazımı döndür)
     private static string CanonicalName(string city)
     {

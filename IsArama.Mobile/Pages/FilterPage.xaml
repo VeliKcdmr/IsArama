@@ -60,12 +60,13 @@
                     <Label Text="💼 POZİSYON" FontSize="11" FontAttributes="Bold"
                            TextColor="{StaticResource TextSecondary}" />
                     <Border Stroke="{StaticResource Border}" StrokeThickness="1.5"
-                            StrokeShape="RoundRectangle 10" Padding="12,0"
+                            StrokeShape="RoundRectangle 10" Padding="4,0"
                             BackgroundColor="{StaticResource Surface}">
-                        <Entry Placeholder="Pozisyon ara..."
-                               Text="{Binding TempPosition}"
-                               TextColor="{StaticResource TextPrimary}"
-                               PlaceholderColor="{StaticResource TextMuted}" />
+                        <Picker Title="Tüm Pozisyonlar"
+                                ItemsSource="{Binding Positions}"
+                                SelectedItem="{Binding TempPosition}"
+                                TextColor="{StaticResource TextPrimary}"
+                                TitleColor="{StaticResource TextMuted}" />
                     </Border>
                 </VerticalStackLayout>
 

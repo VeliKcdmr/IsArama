@@ -1,5 +1,6 @@
 using IsArama.Data.Context;
 using IsArama.Data.Entities;
+using IsArama.Scraper.Helpers;
 using IsArama.Scraper.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ public class ScraperOrchestrator
     private readonly ApplicationDbContext _db;
     private readonly IEnumerable<IScraper> _scrapers;
     private readonly HashService _hashService;
+    private static readonly SemaphoreSlim _lock = new(1, 1);
 
     public ScraperOrchestrator(ApplicationDbContext db, IEnumerable<IScraper> scrapers, HashService hashService)
     {
@@ -19,6 +21,16 @@ public class ScraperOrchestrator
     }
 
     public async Task RunAllAsync()
+    {
+        if (!await _lock.WaitAsync(0)) return; // zaten çalışıyorsa atla
+        try
+        {
+        await RunInternalAsync();
+        }
+        finally { _lock.Release(); }
+    }
+
+    private async Task RunInternalAsync()
     {
         // Tüm mevcut hash'leri başta bir kez çek
         var existingHashes = (await _db.Jobs
@@ -93,16 +105,48 @@ public class ScraperOrchestrator
                     savedCount++;
                 }
                 catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
-                    when (ex.InnerException?.Message.Contains("duplicate key") == true ||
-                          ex.InnerException?.Message.Contains("IX_Jobs_Hash") == true)
                 {
-                    existingHashes.Add(hash);
-                    _db.ChangeTracker.Clear();
+                    var sqlEx = ex.InnerException as Microsoft.Data.SqlClient.SqlException
+                              ?? ex.InnerException?.InnerException as Microsoft.Data.SqlClient.SqlException;
+
+                    // 2601 = unique index violation, 2627 = unique constraint violation
+                    if (sqlEx != null && (sqlEx.Number == 2601 || sqlEx.Number == 2627))
+                    {
+                        existingHashes.Add(hash);
+                        _db.ChangeTracker.Clear();
+                    }
+                    else throw;
                 }
             }
 
             Console.WriteLine($"[{scraper.SourceName}] {savedCount} yeni ilan kaydedildi.");
         }
+
+        // Scraping bittikten sonra başlıkları normalize et
+        await NormalizeTitlesAsync();
     }
 
+    private async Task NormalizeTitlesAsync()
+    {
+        var jobs = await _db.Jobs
+            .Where(j => j.Title != null)
+            .ToListAsync();
+
+        int changed = 0;
+        foreach (var job in jobs)
+        {
+            var normalized = CityNormalizer.StripLocationSuffix(job.Title);
+            if (normalized != job.Title)
+            {
+                job.Title = normalized;
+                changed++;
+            }
+        }
+
+        if (changed > 0)
+        {
+            await _db.SaveChangesAsync();
+            Console.WriteLine($"[Normalize] {changed} başlık normalize edildi.");
+        }
+    }
 }

@@ -1,0 +1,84 @@
+@{
+    ViewData["Title"] = "Çerez Politikası";
+}
+
+<div class="container py-5" style="max-width:800px;">
+    <h1 class="fw-bold mb-1">Çerez Politikası</h1>
+    <p class="text-muted small mb-4">Son güncelleme: @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</p>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">1. Çerez Nedir?</h5>
+        <p>Çerezler, web siteleri tarafından tarayıcınıza kaydedilen küçük metin dosyalarıdır. Web sitemizi ziyaret ettiğinizde tercihlerinizi hatırlamak ve deneyiminizi kişiselleştirmek amacıyla kullanılabilirler.</p>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">2. Kullandığımız Çerezler</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered small mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Çerez Adı</th>
+                        <th>Türü</th>
+                        <th>Amaç</th>
+                        <th>Süre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>cookiesAccepted</code></td>
+                        <td>Zorunlu</td>
+                        <td>Çerez onay tercihini saklar</td>
+                        <td>Kalıcı (localStorage)</td>
+                    </tr>
+                    <tr>
+                        <td>Oturum çerezleri</td>
+                        <td>Zorunlu</td>
+                        <td>Platformun düzgün çalışması</td>
+                        <td>Oturum sonu</td>
+                    </tr>
+                    <tr>
+                        <td>Analitik çerezler</td>
+                        <td>İsteğe bağlı</td>
+                        <td>Ziyaretçi istatistikleri</td>
+                        <td>En fazla 12 ay</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">3. Çerez Tercihleri</h5>
+        <p>Zorunlu çerezler platformun temel işlevleri için gereklidir ve devre dışı bırakılamaz. İsteğe bağlı çerezler için onayınızı her zaman geri çekebilirsiniz.</p>
+        <p>Tarayıcınızın ayarlarından tüm çerezleri silebilir veya engelleyebilirsiniz. Ancak bu durumda platformun bazı özellikleri düzgün çalışmayabilir.</p>
+        <p>Tarayıcınıza göre çerez yönetimi için: <a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener">Chrome</a>, <a href="https://support.mozilla.org/tr/kb/cerezler" target="_blank" rel="noopener">Firefox</a>, <a href="https://support.apple.com/tr-tr/guide/safari/sfri11471/mac" target="_blank" rel="noopener">Safari</a>, <a href="https://support.microsoft.com/tr-tr/windows/microsoft-edge-de-cerezleri-silme-63947406-40ac-c3b8-57b9-2a946a29ae09" target="_blank" rel="noopener">Edge</a></p>
+        <button onclick="resetCookieConsent()" class="btn btn-sm btn-outline-primary mt-2">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Çerez tercihimi sıfırla
+        </button>
+    </div>
+
+@section Scripts {
+    <script>
+        function resetCookieConsent() {
+            localStorage.removeItem('cookieConsent');
+            window.scrollTo(0, document.body.scrollHeight);
+            location.reload();
+        }
+    </script>
+}
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">4. Üçüncü Taraf Çerezleri</h5>
+        <p>Platformumuzdan iş ilanı kaynaklarına (Kariyer.net, Eleman.net vb.) yönlendirildiğinizde ilgili sitelerin çerez politikaları geçerlidir. Bu sitelerin çerez uygulamalarından sorumlu değiliz.</p>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">5. Değişiklikler</h5>
+        <p>Bu Çerez Politikası zaman zaman güncellenebilir. Güncel politikayı bu sayfadan takip edebilirsiniz.</p>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">6. İletişim</h5>
+        <p class="mb-0">Çerez politikamıza ilişkin sorularınız için: <a href="mailto:info@isarama.com.tr">info@isarama.com.tr</a></p>
+    </div>
+</div>

@@ -1,4 +1,5 @@
 using IsArama.Data.Context;
+using IsArama.Scraper.Helpers;
 using IsArama.Scraper.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,13 +26,26 @@ public class ScraperController : ControllerBase
         return Ok("Scraping tamamlandı.");
     }
 
-    [HttpDelete("clear")]
-    public async Task<IActionResult> Clear()
+    [HttpPost("normalize-titles")]
+    public async Task<IActionResult> NormalizeTitles()
     {
-        var jobCount = await _db.Jobs.CountAsync();
-        var companyCount = await _db.Companies.CountAsync();
-        await _db.Jobs.ExecuteDeleteAsync();
-        await _db.Companies.ExecuteDeleteAsync();
-        return Ok($"{jobCount} ilan ve {companyCount} şirket silindi.");
+        var jobs = await _db.Jobs.ToListAsync();
+        int changed = 0;
+
+        foreach (var job in jobs)
+        {
+            var normalized = CityNormalizer.StripLocationSuffix(job.Title);
+            if (normalized != job.Title)
+            {
+                job.Title = normalized;
+                changed++;
+            }
+        }
+
+        if (changed > 0)
+            await _db.SaveChangesAsync();
+
+        return Ok($"{changed} ilanın başlığı normalize edildi.");
     }
+
 }

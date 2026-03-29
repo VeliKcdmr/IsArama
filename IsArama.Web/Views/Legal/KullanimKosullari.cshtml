@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Kullanım Koşulları";
+}
+
+<div class="container py-5" style="max-width:800px;">
+    <h1 class="fw-bold mb-1">Kullanım Koşulları</h1>
+    <p class="text-muted small mb-4">Son güncelleme: @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</p>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">1. Kabul</h5>
+        <p>Bu platformu kullanarak aşağıdaki kullanım koşullarını kabul etmiş sayılırsınız. Koşulları kabul etmiyorsanız lütfen platformu kullanmayınız.</p>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">2. Hizmet Tanımı</h5>
+        <p>İş Arama, Türkiye'deki çeşitli iş ilanı platformlarından otomatik olarak toplanan iş ilanlarını listeleyen bir aggregatör platformdur. Platform, ilanları doğrudan yayınlamaz; yalnızca orijinal kaynaklara bağlantı sağlar.</p>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">3. Sorumluluk Reddi</h5>
+        <ul>
+            <li>Platformda yer alan ilanların doğruluğunu, güncelliğini veya tamlığını garanti edemeyiz.</li>
+            <li>İlanlar üçüncü taraf sitelerden toplanmaktadır; ilan içerikleri bu sitelere aittir.</li>
+            <li>Bir ilana başvurmadan önce orijinal kaynağı kontrol etmenizi öneririz.</li>
+            <li>Platformun kesintisiz çalışacağını garanti etmiyoruz.</li>
+        </ul>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">4. Yasak Kullanımlar</h5>
+        <p>Aşağıdaki kullanımlar kesinlikle yasaktır:</p>
+        <ul>
+            <li>Platformu otomatik araçlarla (bot, scraper vb.) kullanmak</li>
+            <li>Platformun altyapısına zarar vermeye çalışmak</li>
+            <li>Yanıltıcı veya yasa dışı amaçlarla kullanmak</li>
+        </ul>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">5. Değişiklikler</h5>
+        <p>Bu kullanım koşullarını önceden bildirmeksizin değiştirme hakkımız saklıdır. Platformu kullanmaya devam etmeniz, güncel koşulları kabul ettiğiniz anlamına gelir.</p>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold">6. İletişim</h5>
+        <p>Sorularınız için: <a href="mailto:info@isarama.com.tr">info@isarama.com.tr</a></p>
+    </div>
+</div>

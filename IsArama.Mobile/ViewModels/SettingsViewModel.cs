@@ -31,6 +31,15 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public async Task SendFeedbackAsync()
+    {
+        var email = "info@isarama.com.tr";
+        var subject = Uri.EscapeDataString("İş Arama - Geri Bildirim");
+        var uri = new Uri($"mailto:{email}?subject={subject}");
+        await Launcher.OpenAsync(uri);
+    }
+
+    [RelayCommand]
     public async Task CheckConnectionAsync()
     {
         IsChecking = true;

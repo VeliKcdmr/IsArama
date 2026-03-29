@@ -9,7 +9,7 @@ public class LinkedInTrScraper : IScraper
 {
     public string SourceName => "LinkedIn TR";
     private const string BaseUrl = "https://www.linkedin.com/jobs/search/?location=T%C3%BCrkiye&start={0}";
-    private const int MaxPages = 25; // 25 x 10 = 250 ilan
+    private const int MaxPages = 10; // 10 x 10 = 100 ilan
 
     public async Task<List<JobDto>> ScrapeAsync()
     {

@@ -30,7 +30,9 @@ public class JobsController : Controller
             query = query.Where(j => j.Title.Contains(q) || j.Company.Name.Contains(q));
 
         if (!string.IsNullOrWhiteSpace(position))
-            query = query.Where(j => j.Title.Contains(position));
+            query = query.Where(j => j.Title == position
+                || j.Title.StartsWith(position + " - ")
+                || j.Title.StartsWith(position + "-"));
 
         if (!string.IsNullOrWhiteSpace(city))
             query = query.Where(j => j.City == city);
@@ -57,7 +59,20 @@ public class JobsController : Controller
         ViewBag.PageSize   = pageSize;
         ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
         ViewBag.Total      = total;
-        ViewBag.Cities       = await _db.Jobs.Select(j => j.City).Distinct().OrderBy(c => c).ToListAsync();
+        ViewBag.Cities     = await _db.Jobs.Select(j => j.City).Distinct().OrderBy(c => c).ToListAsync();
+        var rawPositions = await _db.Jobs
+            .GroupBy(j => j.Title)
+            .OrderByDescending(g => g.Count())
+            .Take(300)
+            .Select(g => g.Key)
+            .ToListAsync();
+        ViewBag.Positions = rawPositions
+            .Select(t => IsArama.Scraper.Helpers.CityNormalizer.StripLocationSuffix(t))
+            .Where(t => !string.IsNullOrWhiteSpace(t) && !t.Any(c => c >= 0x0600 && c <= 0x06FF))
+            .Distinct()
+            .OrderBy(t => t)
+            .Take(150)
+            .ToList();
         ViewBag.Sources      = await _db.Sources.Where(s => s.IsActive).OrderBy(s => s.Name).ToListAsync();
         ViewBag.SourceCounts = await _db.Jobs
             .GroupBy(j => j.SourceId)

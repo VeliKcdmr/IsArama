@@ -15,9 +15,9 @@ public class ElemanNetScraper : IScraper
         var web = new HtmlWeb();
         web.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36";
 
-        try
+        for (int page = 1; page <= 5; page++)
         {
-            for (int page = 1; page <= 25; page++)
+            try
             {
                 var url = $"https://www.eleman.net/is-ilanlari?page={page}";
                 var doc = await web.LoadFromWebAsync(url);
@@ -75,24 +75,29 @@ public class ElemanNetScraper : IScraper
                         }
                     }
 
+                    // Tarih — listeleme sayfasında genellikle yoktur, UtcNow kullan
+                    var dateSpan = node.SelectSingleNode(".//*[contains(@class,'date') or contains(@class,'time')]");
+                    var pubDate  = ParseDate(dateSpan?.InnerText.Trim() ?? "");
+
                     jobs.Add(new JobDto
                     {
-                        Title          = title,
+                        Title          = CityNormalizer.StripLocationSuffix(title),
                         CompanyName    = company,
                         CompanyLogoUrl = logoUrl ?? "",
                         City           = city,
                         JobType        = jobType,
                         OriginalUrl    = link.StartsWith("http") ? link : $"https://www.eleman.net{link}",
-                        PublishedAt    = DateTime.UtcNow
+                        PublishedAt    = pubDate
                     });
                 }
 
                 await Task.Delay(2000);
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[{SourceName}] Hata: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[{SourceName}] Sayfa {page} atlandı: {ex.Message}");
+                break;
+            }
         }
 
         return jobs;
@@ -119,6 +124,19 @@ public class ElemanNetScraper : IScraper
                 "//article[contains(@class,'job-detail')]");
         }
         catch { return null; }
+    }
+
+    private static DateTime ParseDate(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return DateTime.UtcNow;
+        var lower = text.Trim().ToLower();
+        if (lower.Contains("bugün") || lower.Contains("saat") || lower.Contains("dakika")) return DateTime.UtcNow;
+        if (lower.Contains("dün")) return DateTime.UtcNow.AddDays(-1);
+        var m = System.Text.RegularExpressions.Regex.Match(lower, @"(\d+)\s*gün");
+        if (m.Success && int.TryParse(m.Groups[1].Value, out var d)) return DateTime.UtcNow.AddDays(-d);
+        m = System.Text.RegularExpressions.Regex.Match(lower, @"(\d+)\s*hafta");
+        if (m.Success && int.TryParse(m.Groups[1].Value, out var w)) return DateTime.UtcNow.AddDays(-w * 7);
+        return DateTime.UtcNow;
     }
 
     private static string NormalizeJobType(string raw)

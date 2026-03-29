@@ -24,11 +24,11 @@ public class MemurlarNetScraper : IScraper
         var web = new HtmlWeb();
         web.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
-        try
+        foreach (var (slug, jobType) in Categories)
         {
-            foreach (var (slug, jobType) in Categories)
+            for (int page = 1; page <= 5; page++)
             {
-                for (int page = 1; page <= 25; page++)
+                try
                 {
                     var url = page == 1
                         ? $"https://ilan.memurlar.net/kategori/{slug}/"
@@ -49,16 +49,13 @@ public class MemurlarNetScraper : IScraper
 
                         if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(link)) continue;
 
-                        // Date: first text node inside the <a> (e.g. "23 Mart")
                         var dateText = card.SelectSingleNode(".//text()[normalize-space()!='']")
                                           ?.InnerText?.Trim() ?? "";
-
-                        // City: extract first word of title (typically the province name)
                         var city = CityNormalizer.Normalize(title);
 
                         jobs.Add(new JobDto
                         {
-                            Title = "İşçi Alımı",
+                            Title = "Personel Alımı",
                             CompanyName = title,
                             CompanyLogoUrl = "",
                             City = city,
@@ -72,11 +69,12 @@ public class MemurlarNetScraper : IScraper
 
                     await Task.Delay(1000);
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[{SourceName}] {slug} sayfa {page} atlandı: {ex.Message}");
+                    break;
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[{SourceName}] Hata: {ex.Message}");
         }
 
         return jobs;
@@ -114,6 +112,23 @@ public class MemurlarNetScraper : IScraper
                         node.Remove();
             }
 
+            // <hr> etiketinden sonrasını sil (yorum, sosyal, sidebar vb.)
+            var hrNodes = doc.DocumentNode.SelectNodes("//hr");
+            if (hrNodes != null)
+            {
+                foreach (var hr in hrNodes.ToList())
+                {
+                    var next = hr.NextSibling;
+                    while (next != null)
+                    {
+                        var toRemove = next;
+                        next = next.NextSibling;
+                        toRemove.Remove();
+                    }
+                    hr.Remove();
+                }
+            }
+
             return DescriptionFetcher.TryXPaths(doc, url,
                 "//div[contains(@class,'content-detail panel')]"
                 );
@@ -147,10 +162,13 @@ public class MemurlarNetScraper : IScraper
             && int.TryParse(parts[0], out int day)
             && months.TryGetValue(parts[1], out int month))
         {
-            var year = DateTime.UtcNow.Year;
-            // If month is in the future, it belongs to last year
-            if (month > DateTime.UtcNow.Month) year--;
-            return new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc);
+            try
+            {
+                var year = DateTime.UtcNow.Year;
+                if (month > DateTime.UtcNow.Month) year--;
+                return new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc);
+            }
+            catch { /* geçersiz tarih, UtcNow döner */ }
         }
 
         return DateTime.UtcNow;

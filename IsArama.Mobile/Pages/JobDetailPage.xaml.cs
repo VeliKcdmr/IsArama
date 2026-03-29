@@ -56,14 +56,16 @@ public partial class JobDetailPage : ContentPage
     {
         if (sender is not WebView webView) return;
 
-        // İçeriğin gerçek yüksekliğini JavaScript ile al
+        // Resimler yüklenene kadar bekle (max-height CSS uygulandıktan sonra ölç)
+        await Task.Delay(800);
+
         var result = await webView.EvaluateJavaScriptAsync(
-            "Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)");
+            "document.getElementById('wrap').offsetHeight");
 
         if (double.TryParse(result, System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out var height) && height > 50)
+                System.Globalization.CultureInfo.InvariantCulture, out var height) && height > 20)
         {
-            webView.HeightRequest = height + 20; // küçük padding
+            webView.HeightRequest = height + 24;
         }
     }
 }

@@ -15,38 +15,56 @@
 
         <!-- SOL FİLTRE PANELİ -->
         <div class="col-lg-3">
-            <div class="card border-0 shadow-sm sticky-top" style="top:80px">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-funnel me-2"></i>Filtrele</h5>
-                    <form method="get">
-                        <!-- Arama -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold small">Arama</label>
-                            <input type="text" name="q" value="@qVal"
-                                   class="form-control" placeholder="Pozisyon veya şirket..." />
+            <form method="get" class="sticky-top d-flex flex-column gap-3" style="top:80px">
+
+                <!-- Arama Kartı -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <label class="form-label fw-semibold small">Arama</label>
+                        <input type="text" name="q" value="@qVal"
+                               class="form-control mb-3" placeholder="Pozisyon veya şirket..." />
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary w-50">
+                                <i class="bi bi-search me-1"></i>Ara
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary w-50 text-center">
+                                <i class="bi bi-x-circle me-1"></i>Temizle
+                            </a>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Filtreler Kartı -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body d-flex flex-column gap-3">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-funnel me-2"></i>Filtrele</h6>
 
                         <!-- Şehir -->
-                        <div class="mb-3">
+                        <div>
                             <label class="form-label fw-semibold small">Şehir</label>
                             <select name="city" class="form-select">
                                 <option value="">Tüm Şehirler</option>
                                 @foreach (var city in ViewBag.Cities)
                                 {
-                                    <option value="@city" selected="@(cityVal == (string)city)">@city</option>
+                                    <option value="@city" selected="@(cityVal == city ? "selected" : null)">@city</option>
                                 }
                             </select>
                         </div>
 
                         <!-- Pozisyon -->
-                        <div class="mb-3">
+                        <div>
                             <label class="form-label fw-semibold small">Pozisyon</label>
-                            <input type="text" name="position" value="@posVal"
-                                   class="form-control" placeholder="Pozisyon ara..." />
+                            <select name="position" class="form-select">
+                                <option value="">Tüm Pozisyonlar</option>
+                                @foreach (var pos in ViewBag.Positions)
+                                {
+                                    <option value="@pos" selected="@(posVal == pos ? "selected" : null)">@pos</option>
+                                }
+                            </select>
                         </div>
 
                         <!-- İş Tipi -->
-                        <div class="mb-3">
+                        <div>
                             <label class="form-label fw-semibold small">İş Tipi</label>
                             <select name="jobType" class="form-select">
                                 <option value="">Tümü</option>
@@ -58,7 +76,7 @@
                         </div>
 
                         <!-- Kaynak -->
-                        <div class="mb-3">
+                        <div>
                             <label class="form-label fw-semibold small">Kaynak</label>
                             <select name="sourceId" class="form-select">
                                 <option value="">Tüm Kaynaklar</option>
@@ -72,12 +90,13 @@
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="bi bi-search me-1"></i>Filtrele
                         </button>
-                        <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary w-100">
                             <i class="bi bi-x-circle me-1"></i>Temizle
                         </a>
-                    </form>
+                    </div>
                 </div>
-            </div>
+
+            </form>
         </div>
 
         <!-- SAĞ İLAN LİSTESİ -->

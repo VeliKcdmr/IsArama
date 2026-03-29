@@ -19,13 +19,13 @@
             <Border Grid.Column="0"
                     BackgroundColor="#2d63f0"
                     Stroke="Transparent"
-                    StrokeShape="RoundRectangle 10"
-                    Padding="10,8"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="14,10"
                     VerticalOptions="Center">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding GoBackCommand}" />
                 </Border.GestureRecognizers>
-                <Label Text="←" FontSize="18" TextColor="White" />
+                <Label Text="←" FontSize="24" TextColor="White" />
             </Border>
 
             <Label Grid.Column="1"
@@ -143,8 +143,19 @@
                                    FontSize="13" FontAttributes="Bold"
                                    TextColor="{StaticResource TextPrimary}" />
                             <BoxView HeightRequest="1" BackgroundColor="{StaticResource Border}" />
+
+                            <!-- Açıklama yok mesajı -->
+                            <Label IsVisible="{Binding HasDescription, Converter={StaticResource InverseBool}}"
+                                   Text="Açıklama bulunamadı. Orijinal ilanı ziyaret edin."
+                                   FontSize="13"
+                                   TextColor="{StaticResource TextMuted}"
+                                   HorizontalTextAlignment="Center"
+                                   Padding="0,8" />
+
+                            <!-- Açıklama WebView -->
                             <WebView x:Name="DescriptionWebView"
-                                     HeightRequest="400"
+                                     IsVisible="{Binding HasDescription}"
+                                     HeightRequest="200"
                                      Navigated="OnDescriptionWebViewNavigated" />
                         </VerticalStackLayout>
                     </Border>

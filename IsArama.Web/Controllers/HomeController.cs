@@ -30,7 +30,14 @@ public class HomeController : Controller
         ViewBag.TotalJobs     = totalJobs;
         ViewBag.TotalSources  = totalSources;
         ViewBag.TotalCompanies = totalCompanies;
-        ViewBag.SourceNames   = string.Join(", ", activeSources.Take(3).Select(s => s.Name));
+        var preferredOrder = new[] { "Kariyer.net", "Eleman.net", "Secretcv.com", "İşbul.net" };
+        var displaySources = preferredOrder
+            .Where(n => activeSources.Any(s => s.Name == n))
+            .Take(3)
+            .ToList();
+        if (displaySources.Count < 3)
+            displaySources.AddRange(activeSources.Select(s => s.Name).Except(displaySources).Take(3 - displaySources.Count));
+        ViewBag.SourceNames = string.Join(", ", displaySources);
         ViewBag.Cities = await _db.Jobs
     .Select(j => j.City)
     .Distinct()

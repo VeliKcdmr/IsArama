@@ -37,7 +37,9 @@ public class JobsController : ControllerBase
             query = query.Where(j => j.Title.Contains(q) || j.Company.Name.Contains(q));
 
         if (!string.IsNullOrWhiteSpace(position))
-            query = query.Where(j => j.Title.Contains(position));
+            query = query.Where(j => j.Title == position
+                || j.Title.StartsWith(position + " - ")
+                || j.Title.StartsWith(position + "-"));
 
         if (!string.IsNullOrWhiteSpace(city))
             query = query.Where(j => j.City == city);

@@ -53,6 +53,12 @@ public class ApiService
         catch { return []; }
     }
 
+    public async Task<List<string>> GetPositionsAsync()
+    {
+        try { return await _http.GetFromJsonAsync<List<string>>("positions", Opts) ?? []; }
+        catch { return []; }
+    }
+
     public async Task<int> GetTotalJobCountAsync()
     {
         var result = await GetJobsAsync(pageSize: 1);

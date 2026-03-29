@@ -18,13 +18,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Scrapers
-builder.Services.AddScoped<IScraper, KariyerNetScraper>();
-builder.Services.AddScoped<IScraper, ElemanNetScraper>();
-builder.Services.AddScoped<IScraper, YenibirisComScraper>();
-builder.Services.AddScoped<IScraper, SecretcvComScraper>();
 builder.Services.AddScoped<IScraper, MemurlarNetScraper>();
 builder.Services.AddScoped<IScraper, LinkedInTrScraper>();
 builder.Services.AddScoped<IScraper, IsbulNetScraper>();
+builder.Services.AddScoped<IScraper, ElemanNetScraper>();
+builder.Services.AddScoped<IScraper, YenibirisComScraper>();
+builder.Services.AddScoped<IScraper, SecretcvComScraper>();
+builder.Services.AddScoped<IScraper, KariyerNetScraper>();
 builder.Services.AddScoped<HashService>();
 builder.Services.AddScoped<ScraperOrchestrator>();
 builder.Services.AddScoped<JobDetailFetcher>();
@@ -40,7 +40,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(
+                "https://isarama.com.tr",
+                "https://www.isarama.com.tr",
+                "https://api.isarama.com.tr")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -57,14 +60,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Hangfire Dashboard
-app.UseHangfireDashboard("/hangfire");
+// Hangfire Dashboard — sadece local erişime açık
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = [new Hangfire.Dashboard.LocalRequestsOnlyAuthorizationFilter()]
+});
 
-// Her 3 saatte bir scrape
+// Her 30 dakikada bir scrape
 RecurringJob.AddOrUpdate<ScraperOrchestrator>(
     "scrape-all",
     x => x.RunAllAsync(),
-    "0 */3 * * *");
+    "*/30 * * * *");
 
 app.UseCors("AllowAll");
 if (!app.Environment.IsDevelopment())

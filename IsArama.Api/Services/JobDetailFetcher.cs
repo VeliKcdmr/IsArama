@@ -138,6 +138,23 @@ public class JobDetailFetcher
                     n.Remove();
         }
 
+        // <hr> etiketinden sonrasını sil (yorum, sosyal bölümler vb.)
+        var hrNodes = root.SelectNodes("//hr");
+        if (hrNodes != null)
+        {
+            foreach (var hr in hrNodes.ToList())
+            {
+                var next = hr.NextSibling;
+                while (next != null)
+                {
+                    var toRemove = next;
+                    next = next.NextSibling;
+                    toRemove.Remove();
+                }
+                hr.Remove();
+            }
+        }
+
         var node = root.SelectSingleNode("//div[contains(@class,'content-detail panel')]");
         if (node == null) return null;
 

@@ -24,16 +24,16 @@ public class KariyerNetScraper : IScraper
 
         var searchUrls = new[]
         {
-            (Url: ApiUrl,                                                                              Pages: 25),
-            (Url: "https://candidatesearchapigateway.kariyer.net/search?calistirma-sekli=yari-zamanli", Pages: 25),
-            (Url: "https://candidatesearchapigateway.kariyer.net/search?calistirma-sekli=staj",         Pages: 25),
-            (Url: "https://candidatesearchapigateway.kariyer.net/search?calistirma-sekli=uzaktan",      Pages: 25),
+            (Url: ApiUrl,                                                                              Pages: 4),
+            (Url: "https://candidatesearchapigateway.kariyer.net/search?calistirma-sekli=yari-zamanli", Pages: 4),
+            (Url: "https://candidatesearchapigateway.kariyer.net/search?calistirma-sekli=staj",         Pages: 4),
+            (Url: "https://candidatesearchapigateway.kariyer.net/search?calistirma-sekli=uzaktan",      Pages: 4),
         };
 
-        try
-        {
-            foreach (var (url, maxPages) in searchUrls)
-                for (int page = 1; page <= maxPages; page++)
+        foreach (var (url, maxPages) in searchUrls)
+            for (int page = 1; page <= maxPages; page++)
+            {
+                try
                 {
                     var payload = new { page, pageSize = 25 };
                     var response = await http.PostAsJsonAsync(url, payload);
@@ -56,7 +56,7 @@ public class KariyerNetScraper : IScraper
 
                         jobs.Add(new JobDto
                         {
-                            Title = item.Title,
+                            Title = CityNormalizer.StripLocationSuffix(item.Title),
                             CompanyName = string.IsNullOrWhiteSpace(item.CompanyName) ? "Belirtilmemiş" : item.CompanyName,
                             CompanyLogoUrl = logoUrl,
                             City = city,
@@ -68,11 +68,12 @@ public class KariyerNetScraper : IScraper
 
                     await Task.Delay(1000);
                 }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[{SourceName}] Hata: {ex.Message}");
-        }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[{SourceName}] Sayfa {page} atlandı: {ex.Message}");
+                    break;
+                }
+            }
 
         return jobs;
     }

@@ -9,7 +9,7 @@ public class IsbulNetScraper : IScraper
 {
     public string SourceName => "İşbul.net";
     private const string BaseUrl = "https://www.isbul.net/is-ilanlari?page={0}";
-    private const int MaxPages = 25;
+    private const int MaxPages = 5;
 
     public async Task<List<JobDto>> ScrapeAsync()
     {
@@ -17,9 +17,9 @@ public class IsbulNetScraper : IScraper
         var web = new HtmlWeb();
         web.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-        try
+        for (int page = 1; page <= MaxPages; page++)
         {
-            for (int page = 1; page <= MaxPages; page++)
+            try
             {
                 var url = string.Format(BaseUrl, page);
                 var doc = await web.LoadFromWebAsync(url);
@@ -70,7 +70,7 @@ public class IsbulNetScraper : IScraper
 
                     jobs.Add(new JobDto
                     {
-                        Title          = HtmlEntity.DeEntitize(title),
+                        Title          = CityNormalizer.StripLocationSuffix(HtmlEntity.DeEntitize(title)),
                         CompanyName    = string.IsNullOrWhiteSpace(company) ? "Belirtilmemiş" : company,
                         CompanyLogoUrl = logoUrl,
                         City           = city,
@@ -82,10 +82,11 @@ public class IsbulNetScraper : IScraper
 
                 await Task.Delay(1000);
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[{SourceName}] Hata: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[{SourceName}] Sayfa {page} atlandı: {ex.Message}");
+                break;
+            }
         }
 
         return jobs;

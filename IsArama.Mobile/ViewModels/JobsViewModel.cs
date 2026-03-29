@@ -63,6 +63,7 @@ public partial class JobsViewModel : ObservableObject
     public ObservableCollection<JobListItem> Jobs { get; } = [];
     public ObservableCollection<SourceInfo> Sources { get; } = [];
     public ObservableCollection<string> Cities { get; } = [];
+    public ObservableCollection<string> Positions { get; } = [];
     public ObservableCollection<string> JobTypes { get; } =
         ["Tam Zamanlı", "Sözleşmeli", "Memur", "Staj", "Yarı Zamanlı"];
 
@@ -106,9 +107,10 @@ public partial class JobsViewModel : ObservableObject
     [RelayCommand]
     public async Task InitAsync()
     {
-        var sourcesTask = _api.GetSourcesAsync();
-        var citiesTask  = _api.GetCitiesAsync();
-        await Task.WhenAll(sourcesTask, citiesTask);
+        var sourcesTask   = _api.GetSourcesAsync();
+        var citiesTask    = _api.GetCitiesAsync();
+        var positionsTask = _api.GetPositionsAsync();
+        await Task.WhenAll(sourcesTask, citiesTask, positionsTask);
 
         Sources.Clear();
         foreach (var s in sourcesTask.Result)
@@ -117,6 +119,10 @@ public partial class JobsViewModel : ObservableObject
         Cities.Clear();
         foreach (var c in citiesTask.Result.Where(x => x != "Belirtilmemiş").Take(60))
             Cities.Add(c);
+
+        Positions.Clear();
+        foreach (var p in positionsTask.Result)
+            Positions.Add(p);
 
         await ReloadAsync();
     }

@@ -15,14 +15,14 @@ public class SecretcvComScraper : IScraper
         var web = new HtmlWeb();
         web.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
-        try
+        for (int page = 1; page <= 5; page++)
         {
-            for (int page = 1; page <= 25; page++)
-            {
-                var url = page == 1
-                    ? "https://www.secretcv.com/is-ilanlari"
-                    : $"https://www.secretcv.com/is-ilanlari/{page}";
+            var url = page == 1
+                ? "https://www.secretcv.com/is-ilanlari"
+                : $"https://www.secretcv.com/is-ilanlari/{page}";
 
+            try
+            {
                 var doc = await web.LoadFromWebAsync(url);
 
                 var cards = doc.DocumentNode.SelectNodes(
@@ -62,7 +62,7 @@ public class SecretcvComScraper : IScraper
 
                     jobs.Add(new JobDto
                     {
-                        Title          = title,
+                        Title          = CityNormalizer.StripLocationSuffix(title),
                         CompanyName    = string.IsNullOrWhiteSpace(company) ? "Belirtilmemiş" : company,
                         CompanyLogoUrl = logoUrl,
                         City           = string.IsNullOrWhiteSpace(city) ? "Belirtilmemiş" : city,
@@ -74,10 +74,11 @@ public class SecretcvComScraper : IScraper
 
                 await Task.Delay(1500);
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[{SourceName}] Hata: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[{SourceName}] Sayfa {page} atlandı: {ex.Message}");
+                break;
+            }
         }
 
         return jobs;

@@ -12,8 +12,9 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow">
         <div class="container">
-            <a class="navbar-brand fw-bold fs-4" asp-controller="Home" asp-action="Index">
-                <i class="bi bi-briefcase-fill me-2"></i>İş Arama
+            <a class="navbar-brand fw-bold fs-4 d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
+                <img src="~/images/app-icon.svg" alt="İş Arama" width="32" height="32" style="border-radius:8px;" />
+                İş Arama
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
                 <span class="navbar-toggler-icon"></span>
@@ -39,21 +40,211 @@
         @RenderBody()
     </main>
 
-    <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container text-center">
-            <p class="mb-1">
-                <i class="bi bi-briefcase-fill me-1"></i>
-                <strong>İş Arama</strong> — Türkiye'nin tüm iş ilanları tek platformda
-            </p>
-            <p class="small mb-0">
-                Kariyer.net · Eleman.net · Yenibiris.com · Secretcv.com · Memurlar.net · LinkedIn TR · İşbul.net
-            </p>
+    <!-- FOOTER -->
+    <footer class="mt-5" style="background:#0f172a; color:#94a3b8;">
+        <div class="container py-5">
+            <div class="row g-4">
+
+                <!-- Hakkında -->
+                <div class="col-lg-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <img src="~/images/app-icon.svg" alt="İş Arama" width="36" height="36" style="border-radius:8px;" />
+                        <span class="fw-bold fs-5 text-white">İş Arama</span>
+                    </div>
+                    <p class="small mb-3">Türkiye'nin önde gelen iş ilanı platformlarından toplanan binlerce ilan tek ekranda. Kariyer hedeflerinize ulaşmak için doğru adrestesiniz.</p>
+                    <p class="small mb-0" style="color:#64748b;">
+                        <i class="bi bi-envelope me-1"></i>info@isarama.com.tr
+                    </p>
+                </div>
+
+                <!-- Hızlı Bağlantılar -->
+                <div class="col-lg-2 col-6">
+                    <h6 class="fw-bold text-white mb-3">Hızlı Erişim</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="/" class="text-decoration-none" style="color:#94a3b8;">Anasayfa</a></li>
+                        <li class="mb-2"><a href="/Jobs" class="text-decoration-none" style="color:#94a3b8;">İş İlanları</a></li>
+                        <li class="mb-2"><a href="/Jobs?jobType=Uzaktan" class="text-decoration-none" style="color:#94a3b8;">Uzaktan İşler</a></li>
+                        <li class="mb-2"><a href="/Jobs?jobType=Staj" class="text-decoration-none" style="color:#94a3b8;">Staj İlanları</a></li>
+                    </ul>
+                </div>
+
+                <!-- Kaynaklar -->
+                <div class="col-lg-3 col-6">
+                    <h6 class="fw-bold text-white mb-3">İlan Kaynakları</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><i class="bi bi-dot text-primary"></i>Kariyer.net</li>
+                        <li class="mb-2"><i class="bi bi-dot text-primary"></i>Eleman.net</li>
+                        <li class="mb-2"><i class="bi bi-dot text-primary"></i>Secretcv.com</li>
+                        <li class="mb-2"><i class="bi bi-dot text-primary"></i>Yenibiris.com</li>
+                        <li class="mb-2"><i class="bi bi-dot text-primary"></i>Memurlar.net</li>
+                        <li class="mb-2"><i class="bi bi-dot text-primary"></i>LinkedIn TR</li>
+                        <li class="mb-2"><i class="bi bi-dot text-primary"></i>İşbul.net</li>
+                    </ul>
+                </div>
+
+                <!-- Yasal -->
+                <div class="col-lg-3">
+                    <h6 class="fw-bold text-white mb-3">Yasal</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="/gizlilik-politikasi" class="text-decoration-none" style="color:#94a3b8;">Gizlilik Politikası</a></li>
+                        <li class="mb-2"><a href="/kullanim-kosullari" class="text-decoration-none" style="color:#94a3b8;">Kullanım Koşulları</a></li>
+                        <li class="mb-2"><a href="/kvkk" class="text-decoration-none" style="color:#94a3b8;">KVKK Aydınlatma Metni</a></li>
+                        <li class="mb-2"><a href="/cerez-politikasi" class="text-decoration-none" style="color:#94a3b8;">Çerez Politikası</a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Alt Bar -->
+        <div style="border-top:1px solid #1e293b;">
+            <div class="container py-3 d-flex flex-wrap justify-content-between align-items-center small" style="color:#475569;">
+                <span>© @DateTime.Now.Year İş Arama · isarama.com.tr · Tüm hakları saklıdır.</span>
+                <span>Türkiye'nin iş ilanları tek platformda</span>
+            </div>
         </div>
     </footer>
+
+    <!-- GERİ BİLDİRİM BUTONU -->
+    <button onclick="document.getElementById('feedbackModal').style.display='flex'"
+            style="position:fixed;right:20px;bottom:90px;z-index:8888;background:#2563eb;color:#fff;border:none;border-radius:50px;padding:10px 18px;font-size:0.85rem;font-weight:600;box-shadow:0 4px 16px rgba(37,99,235,0.4);cursor:pointer;display:flex;align-items:center;gap:6px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Geri Bildirim
+    </button>
+
+    <!-- GERİ BİLDİRİM MODALİ -->
+    <div id="feedbackModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;padding:16px;">
+        <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;">
+            <div style="background:#2563eb;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                    <div style="color:#fff;font-weight:700;font-size:1.05rem;">Geri Bildirim Gönder</div>
+                    <div style="color:#bfdbfe;font-size:0.8rem;margin-top:2px;">Görüş ve önerilerinizi bekliyoruz</div>
+                </div>
+                <button onclick="closeFeedback()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">✕</button>
+            </div>
+            <div style="padding:24px;">
+                <div id="feedbackSuccess" style="display:none;text-align:center;padding:20px 0;">
+                    <div style="font-size:2.5rem;margin-bottom:12px;">✅</div>
+                    <div style="font-weight:700;color:#16a34a;font-size:1.05rem;">Teşekkürler!</div>
+                    <div style="color:#6b7280;font-size:0.9rem;margin-top:6px;">Geri bildiriminiz alındı.</div>
+                </div>
+                <form id="feedbackForm" onsubmit="submitFeedback(event)">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                        <div>
+                            <label style="font-size:0.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Ad Soyad <span style="color:#9ca3af;">(opsiyonel)</span></label>
+                            <input id="fb-name" type="text" placeholder="Adınız" style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.88rem;outline:none;box-sizing:border-box;" />
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">E-posta <span style="color:#9ca3af;">(opsiyonel)</span></label>
+                            <input id="fb-email" type="email" placeholder="mail@örnek.com" style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.88rem;outline:none;box-sizing:border-box;" />
+                        </div>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:0.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Konu <span style="color:#dc2626;">*</span></label>
+                        <select id="fb-subject" style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.88rem;outline:none;background:#fff;box-sizing:border-box;">
+                            <option value="">Seçiniz...</option>
+                            <option value="Öneri">💡 Öneri</option>
+                            <option value="Hata Bildirimi">🐛 Hata Bildirimi</option>
+                            <option value="Eksik İlan">📋 Eksik / Hatalı İlan</option>
+                            <option value="Tasarım">🎨 Tasarım</option>
+                            <option value="Diğer">💬 Diğer</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="font-size:0.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Mesajınız <span style="color:#dc2626;">*</span></label>
+                        <textarea id="fb-message" rows="4" placeholder="Düşüncelerinizi yazın..." style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:0.88rem;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"></textarea>
+                    </div>
+                    <div id="feedbackError" style="display:none;color:#dc2626;font-size:0.82rem;margin-bottom:10px;"></div>
+                    <button type="submit" id="fb-submit" style="width:100%;padding:11px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;">
+                        Gönder
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÇEREZ BİLDİRİMİ -->
+    <div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(30,41,59,0.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid rgba(51,65,85,0.6);padding:16px 24px;">
+        <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="small" style="color:#cbd5e1;max-width:700px;">
+                <i class="bi bi-shield-check me-2 text-primary"></i>
+                Bu web sitesi, deneyiminizi iyileştirmek için çerezler kullanmaktadır. Sitemizi kullanmaya devam ederek
+                <a href="/cerez-politikasi" class="text-primary text-decoration-none">Çerez Politikamızı</a> ve
+                <a href="/kvkk" class="text-primary text-decoration-none">KVKK Aydınlatma Metnimizi</a> kabul etmiş sayılırsınız.
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/cerez-politikasi" class="btn btn-sm btn-outline-secondary">Detaylar</a>
+                <button onclick="rejectCookies()" class="btn btn-sm btn-outline-danger">Reddet</button>
+                <button onclick="acceptCookies()" class="btn btn-sm btn-primary px-4">Kabul Et</button>
+            </div>
+        </div>
+    </div>
 
     <script src="~/lib/jquery/jquery.min.js"></script>
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        // Geri Bildirim
+        function closeFeedback() {
+            document.getElementById('feedbackModal').style.display = 'none';
+            document.getElementById('feedbackSuccess').style.display = 'none';
+            document.getElementById('feedbackForm').style.display = 'block';
+            document.getElementById('feedbackError').style.display = 'none';
+            document.getElementById('fb-subject').value = '';
+            document.getElementById('fb-message').value = '';
+            document.getElementById('fb-name').value = '';
+            document.getElementById('fb-email').value = '';
+        }
+        document.getElementById('feedbackModal').addEventListener('click', function(e) {
+            if (e.target === this) closeFeedback();
+        });
+        async function submitFeedback(e) {
+            e.preventDefault();
+            const subject = document.getElementById('fb-subject').value;
+            const message = document.getElementById('fb-message').value.trim();
+            const errEl = document.getElementById('feedbackError');
+            errEl.style.display = 'none';
+            if (!subject) { errEl.textContent = 'Lütfen bir konu seçin.'; errEl.style.display = 'block'; return; }
+            if (!message) { errEl.textContent = 'Lütfen mesajınızı yazın.'; errEl.style.display = 'block'; return; }
+            const btn = document.getElementById('fb-submit');
+            btn.disabled = true; btn.textContent = 'Gönderiliyor...';
+            try {
+                const res = await fetch('https://api.isarama.com.tr/api/Feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: document.getElementById('fb-name').value.trim() || null,
+                        email: document.getElementById('fb-email').value.trim() || null,
+                        subject, message, platform: 'Web'
+                    })
+                });
+                if (res.ok) {
+                    document.getElementById('feedbackForm').style.display = 'none';
+                    document.getElementById('feedbackSuccess').style.display = 'block';
+                    setTimeout(closeFeedback, 2500);
+                } else {
+                    errEl.textContent = 'Bir hata oluştu, tekrar deneyin.'; errEl.style.display = 'block';
+                }
+            } catch {
+                errEl.textContent = 'Bağlantı hatası, tekrar deneyin.'; errEl.style.display = 'block';
+            }
+            btn.disabled = false; btn.textContent = 'Gönder';
+        }
+
+        function acceptCookies() {
+            localStorage.setItem('cookieConsent', 'accepted');
+            document.getElementById('cookieBanner').style.display = 'none';
+        }
+        function rejectCookies() {
+            localStorage.setItem('cookieConsent', 'rejected');
+            document.getElementById('cookieBanner').style.display = 'none';
+        }
+        if (!localStorage.getItem('cookieConsent')) {
+            document.getElementById('cookieBanner').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
