@@ -212,7 +212,7 @@
             const btn = document.getElementById('fb-submit');
             btn.disabled = true; btn.textContent = 'Gönderiliyor...';
             try {
-                const res = await fetch('https://api.isarama.com.tr/api/Feedback', {
+                const res = await fetch('http://192.168.1.15:8080/api/Feedback', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

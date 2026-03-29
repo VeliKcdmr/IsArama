@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="IsArama.Mobile.Pages.FeedbackPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:IsArama.Mobile.ViewModels"
+    Title=""
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="{StaticResource Background}">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" BackgroundColor="{StaticResource PrimaryDark}"
+              Padding="16,48,16,20" ColumnDefinitions="Auto,*">
+            <Border Grid.Column="0"
+                    BackgroundColor="Transparent"
+                    Stroke="Transparent" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="4,6" Margin="0,0,8,0">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                </Border.GestureRecognizers>
+                <Label Text="←" FontSize="24" TextColor="White" VerticalOptions="Center" />
+            </Border>
+            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                <Label Text="💬 Geri Bildirim" FontSize="20" FontAttributes="Bold" TextColor="White" />
+                <Label Text="Görüş ve önerilerinizi bekliyoruz" FontSize="12" TextColor="#aac4ff" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16" Spacing="14">
+
+                <!-- Başarı Ekranı -->
+                <Border IsVisible="{Binding IsSuccess}"
+                        BackgroundColor="{StaticResource Surface}"
+                        Stroke="#bbf7d0" StrokeThickness="1.5"
+                        StrokeShape="RoundRectangle 16"
+                        Padding="32,40">
+                    <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                        <Label Text="✅" FontSize="52" HorizontalOptions="Center" />
+                        <Label Text="Teşekkürler!" FontSize="20" FontAttributes="Bold"
+                               TextColor="#16a34a" HorizontalOptions="Center" />
+                        <Label Text="Geri bildiriminiz alındı.&#10;En kısa sürede değerlendireceğiz."
+                               FontSize="14" TextColor="{StaticResource TextSecondary}"
+                               HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                               LineBreakMode="WordWrap" />
+                        <Border BackgroundColor="{StaticResource Primary}"
+                                Stroke="Transparent" StrokeThickness="0"
+                                StrokeShape="RoundRectangle 10"
+                                Padding="24,11" Margin="0,8,0,0">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ResetCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Yeni Bildirim Gönder" FontSize="14" FontAttributes="Bold"
+                                   TextColor="White" HorizontalOptions="Center" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Form -->
+                <VerticalStackLayout IsVisible="{Binding IsSuccess, Converter={StaticResource InverseBool}}" Spacing="14">
+
+                    <!-- Ad Soyad -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="AD SOYAD (opsiyonel)" FontSize="11" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Border BackgroundColor="{StaticResource Surface}"
+                                Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                                StrokeShape="RoundRectangle 10" Padding="14,0">
+                            <Entry Text="{Binding Name}" Placeholder="Adınız Soyadınız"
+                                   PlaceholderColor="{StaticResource TextSecondary}"
+                                   TextColor="{StaticResource TextPrimary}"
+                                   FontSize="14" HeightRequest="46" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- E-posta -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="E-POSTA (opsiyonel)" FontSize="11" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Border BackgroundColor="{StaticResource Surface}"
+                                Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                                StrokeShape="RoundRectangle 10" Padding="14,0">
+                            <Entry Text="{Binding Email}" Placeholder="mail@örnek.com"
+                                   Keyboard="Email"
+                                   PlaceholderColor="{StaticResource TextSecondary}"
+                                   TextColor="{StaticResource TextPrimary}"
+                                   FontSize="14" HeightRequest="46" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Konu -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="KONU *" FontSize="11" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Border BackgroundColor="{StaticResource Surface}"
+                                Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                                StrokeShape="RoundRectangle 10" Padding="10,0">
+                            <Picker ItemsSource="{Binding Subjects}"
+                                    SelectedItem="{Binding SelectedSubject}"
+                                    Title="Konu seçin..."
+                                    TitleColor="{StaticResource TextSecondary}"
+                                    TextColor="{StaticResource TextPrimary}"
+                                    FontSize="14" HeightRequest="46" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Mesaj -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="MESAJ *" FontSize="11" FontAttributes="Bold"
+                               TextColor="{StaticResource TextSecondary}" />
+                        <Border BackgroundColor="{StaticResource Surface}"
+                                Stroke="{StaticResource Border}" StrokeThickness="1.5"
+                                StrokeShape="RoundRectangle 10" Padding="14,10">
+                            <Editor Text="{Binding Message}"
+                                    Placeholder="Düşüncelerinizi yazın..."
+                                    PlaceholderColor="{StaticResource TextSecondary}"
+                                    TextColor="{StaticResource TextPrimary}"
+                                    FontSize="14" MinimumHeightRequest="130"
+                                    AutoSize="TextChanges" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Hata -->
+                    <Border IsVisible="{Binding HasError}"
+                            BackgroundColor="#fef2f2" Stroke="#fecaca"
+                            StrokeThickness="1" StrokeShape="RoundRectangle 8" Padding="12,8">
+                        <Label Text="{Binding ErrorText}" FontSize="13"
+                               TextColor="#dc2626" LineBreakMode="WordWrap" />
+                    </Border>
+
+                    <!-- Gönder Butonu -->
+                    <Border StrokeShape="RoundRectangle 12" Stroke="Transparent"
+                            StrokeThickness="0" Padding="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#2563eb" Offset="0" />
+                                <GradientStop Color="#1d4ed8" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SendCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid Padding="16,14" ColumnDefinitions="Auto,*">
+                            <ActivityIndicator Grid.Column="0"
+                                              IsRunning="{Binding IsSending}"
+                                              IsVisible="{Binding IsSending}"
+                                              Color="White" WidthRequest="18" HeightRequest="18"
+                                              Margin="0,0,10,0" VerticalOptions="Center" />
+                            <Label Grid.Column="1"
+                                   Text="{Binding SendButtonText}"
+                                   FontSize="15" FontAttributes="Bold" TextColor="White"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

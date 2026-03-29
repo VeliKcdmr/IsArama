@@ -30,12 +30,14 @@ public static class MauiProgram
         builder.Services.AddSingleton<JobsViewModel>();   // singleton → FilterPage ile paylaşım
         builder.Services.AddTransient<JobDetailViewModel>();
         builder.Services.AddTransient<SettingsViewModel>();
+        builder.Services.AddTransient<FeedbackViewModel>();
 
         // Pages
         builder.Services.AddTransient<JobsPage>();
         builder.Services.AddTransient<JobDetailPage>();
         builder.Services.AddTransient<FilterPage>();
         builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<FeedbackPage>();
 
         // AppShell
         builder.Services.AddSingleton<AppShell>();

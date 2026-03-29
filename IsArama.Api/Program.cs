@@ -43,7 +43,9 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
                 "https://isarama.com.tr",
                 "https://www.isarama.com.tr",
-                "https://api.isarama.com.tr")
+                "https://api.isarama.com.tr",
+                "http://192.168.1.15",
+                "http://192.168.1.15:8080")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });

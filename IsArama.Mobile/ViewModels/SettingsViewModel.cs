@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using IsArama.Mobile.Pages;
 using IsArama.Mobile.Services;
 
 namespace IsArama.Mobile.ViewModels;
@@ -33,10 +34,7 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     public async Task SendFeedbackAsync()
     {
-        var email = "info@isarama.com.tr";
-        var subject = Uri.EscapeDataString("İş Arama - Geri Bildirim");
-        var uri = new Uri($"mailto:{email}?subject={subject}");
-        await Launcher.OpenAsync(uri);
+        await Shell.Current.GoToAsync(nameof(Pages.FeedbackPage));
     }
 
     [RelayCommand]

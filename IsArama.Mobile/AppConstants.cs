@@ -2,5 +2,5 @@ namespace IsArama.Mobile;
 
 public static class AppConstants
 {
-    public const string ApiBaseUrl = "https://api.isarama.com.tr/api/";
+    public const string ApiBaseUrl = "http://192.168.1.15:8080/api/";
 }
