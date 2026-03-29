@@ -35,10 +35,12 @@ namespace IsArama.Data.Migrations
                 nullable: true);
 
             migrationBuilder.Sql(@"
+                SET IDENTITY_INSERT [Sources] ON;
                 IF NOT EXISTS (SELECT 1 FROM [Sources] WHERE [Id] = 11)
                     INSERT INTO [Sources] ([Id], [BaseUrl], [IsActive], [Name]) VALUES (11, 'https://www.isbul.net', 1, N'İşbul.net');
                 IF NOT EXISTS (SELECT 1 FROM [Sources] WHERE [Id] = 12)
                     INSERT INTO [Sources] ([Id], [BaseUrl], [IsActive], [Name]) VALUES (12, 'https://www.linkedin.com', 1, N'LinkedIn TR');
+                SET IDENTITY_INSERT [Sources] OFF;
             ");
         }
 
